@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Admin check: checks token custom claims or admin collection record
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Admins collection: only super admin or existing admins can manage
+    match /admins/{adminId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Products collection
+    // Public can read active products; Admins have full CRUD
+    match /products/{productId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Categories collection
+    // Public can read active categories; Admins have full CRUD
+    match /categories/{categoryId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Orders / Inquiries collection
+    // Customers can submit orders (create); Only admins can view, update status, or delete orders
+    match /orders/{orderId} {
+      allow create: if request.resource.data.customer != null &&
+                      request.resource.data.items is list &&
+                      request.resource.data.total > 0;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Store Settings
+    // Public can read general settings (contact, banners, announcements); Admins can edit
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Inventory logs / Activity logs
+    match /inventoryLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+    match /activityLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
