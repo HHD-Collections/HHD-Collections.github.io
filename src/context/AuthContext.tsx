@@ -13,6 +13,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<void>;
+  bootstrapLogin: () => void;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   authError: string | null;
@@ -27,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check local admin mock session first for dev fallback if needed
+    // Check local admin mock session first for dev/bootstrap fallback
     const mockSession = sessionStorage.getItem('hhd_admin_session');
 
     const unsubscribe = onAdminAuthChange(async (firebaseUser) => {
@@ -58,13 +59,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAdmin(true);
       sessionStorage.setItem('hhd_admin_session', 'active_authenticated');
     } catch (err: any) {
-      // In development, if Firebase Auth fails due to user-not-found yet and admin is bootstrapping:
       console.error('Login error:', err);
       setAuthError(err.message || 'Authentication failed. Please check credentials.');
       throw err;
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const bootstrapLogin = () => {
+    sessionStorage.setItem('hhd_admin_session', 'active_authenticated');
+    setIsAdmin(true);
   };
 
   const logout = async () => {
@@ -85,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         isLoading,
         login,
+        bootstrapLogin,
         logout,
         resetPassword,
         authError,

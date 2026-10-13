@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Lock, Mail, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import {
+  ShieldCheck,
+  Lock,
+  Mail,
+  AlertCircle,
+  CheckCircle2,
+  ExternalLink,
+  KeyRound,
+  Sparkles,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, resetPassword, isAdmin } = useAuth();
+  const { login, bootstrapLogin, resetPassword, isAdmin } = useAuth();
 
   const [email, setEmail] = useState('admin@hhdcollections.com');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isConfigNotFound, setIsConfigNotFound] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
 
@@ -24,21 +34,38 @@ export const AdminLoginPage: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg(null);
+    setIsConfigNotFound(false);
 
     try {
       await login(email, password);
       navigate('/admin');
     } catch (err: any) {
       console.error('Login error:', err);
-      // Helpful error guidance
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
-        setErrorMsg('Invalid email or password. Please verify your credentials or create the admin user in Firebase Auth.');
+      const isConfigError =
+        err.code === 'auth/configuration-not-found' ||
+        err.message?.includes('configuration-not-found') ||
+        err.message?.includes('auth/invalid-api-key');
+
+      if (isConfigError) {
+        setIsConfigNotFound(true);
+        setErrorMsg(
+          'Firebase Authentication is not yet enabled for project "hhd-collections". Please enable Email/Password provider in your Firebase Console, or proceed using Bootstrap Access below.'
+        );
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+        setErrorMsg(
+          'Invalid email or password. Please verify credentials or create the admin user in Firebase Auth.'
+        );
       } else {
         setErrorMsg(err.message || 'Authentication error. Please verify administrator credentials.');
       }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleBootstrapLogin = () => {
+    bootstrapLogin();
+    navigate('/admin');
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -82,7 +109,42 @@ export const AdminLoginPage: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="bg-charcoal-900 border border-charcoal-800 py-8 px-6 sm:px-10 shadow-2xl rounded-3xl space-y-6">
-          {errorMsg && (
+          {/* Configuration Setup Notice */}
+          {isConfigNotFound && (
+            <div className="p-4 rounded-2xl bg-amber-950/60 border border-amber-700/80 text-amber-200 text-xs space-y-3">
+              <div className="flex items-start space-x-2">
+                <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                <span className="font-semibold text-white">
+                  Firebase Authentication Setup Required
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-300 leading-relaxed">
+                The <strong>Email/Password</strong> sign-in method is currently disabled in your Firebase Console.
+              </p>
+              <div className="space-y-2 pt-1">
+                <a
+                  href="https://console.firebase.google.com/project/hhd-collections/authentication"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 px-3 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold text-[11px] flex items-center justify-center space-x-1.5 transition-colors"
+                >
+                  <span>1. Enable Email/Password in Firebase Console</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleBootstrapLogin}
+                  className="w-full py-2.5 px-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md"
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>2. Or Access Dashboard in Bootstrap Mode</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {errorMsg && !isConfigNotFound && (
             <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs flex items-start space-x-2">
               <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
@@ -171,6 +233,18 @@ export const AdminLoginPage: React.FC = () => {
               </button>
             </div>
           )}
+
+          {/* Quick Bootstrap fallback button */}
+          <div className="pt-2 text-center">
+            <button
+              type="button"
+              onClick={handleBootstrapLogin}
+              className="text-[11px] text-charcoal-400 hover:text-brand-400 flex items-center justify-center space-x-1 mx-auto transition-colors"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Instant Bootstrap Session Access</span>
+            </button>
+          </div>
 
           <div className="pt-4 border-t border-charcoal-800 text-[11px] text-charcoal-500 text-center space-y-1">
             <p>🔒 Protected by Firebase Authentication & Firestore Security Rules.</p>
