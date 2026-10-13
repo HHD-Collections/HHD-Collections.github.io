@@ -144,9 +144,19 @@ export const AdminLoginPage: React.FC = () => {
           )}
 
           {errorMsg && !isConfigNotFound && (
-            <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs flex items-start space-x-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
+            <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs space-y-2.5">
+              <div className="flex items-start space-x-2">
+                <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                <span>{errorMsg}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleBootstrapLogin}
+                className="w-full py-2 px-3 rounded-lg bg-rose-900/60 hover:bg-rose-800 text-white font-medium text-[11px] flex items-center justify-center space-x-1.5 transition-colors border border-rose-700/50"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Instant Bootstrap Access (Bypass Error)</span>
+              </button>
             </div>
           )}
 

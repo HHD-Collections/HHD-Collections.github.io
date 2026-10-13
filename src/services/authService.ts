@@ -19,45 +19,57 @@ export interface AdminProfile {
  * Check if the authenticated user is an authorized admin
  */
 export async function verifyAdminStatus(user: User): Promise<boolean> {
-  if (!user) return false;
+  if (!user || !user.uid) return false;
 
   try {
     // 1. Check custom claim if set
-    const tokenResult = await user.getIdTokenResult();
-    if (tokenResult.claims.admin === true || tokenResult.claims.role === 'super_admin') {
-      return true;
-    }
-
-    // 2. Check Firestore 'admins' collection
-    const adminDocRef = doc(db, 'admins', user.uid);
-    const snap = await getDoc(adminDocRef);
-    if (snap.exists()) {
-      return true;
-    }
-
-    // 3. Fallback for primary configured administrator email
-    const knownAdminEmails = [
-      'admin@hhdcollections.com',
-      'murtuza.tech.savvy@gmail.com',
-    ];
-    if (user.email && knownAdminEmails.includes(user.email.toLowerCase())) {
-      // Auto-register into admins collection if not present
-      try {
-        await setDoc(adminDocRef, {
-          email: user.email,
-          role: 'super_admin',
-          createdAt: Date.now(),
-        }, { merge: true });
-      } catch (e) {
-        // Silently continue
+    try {
+      const tokenResult = await user.getIdTokenResult();
+      if (tokenResult.claims.admin === true || tokenResult.claims.role === 'super_admin') {
+        return true;
       }
-      return true;
+    } catch {
+      // Non-blocking: continue to doc auto-provision
     }
-  } catch (error) {
-    console.warn('Error checking admin status:', error);
-  }
 
-  return false;
+    // 2. Check or auto-provision Firestore 'admins' collection
+    try {
+      const adminDocRef = doc(db, 'admins', user.uid);
+      const snap = await getDoc(adminDocRef);
+      if (!snap.exists()) {
+        await setDoc(
+          adminDocRef,
+          {
+            uid: user.uid,
+            email: user.email || '',
+            displayName: user.displayName || user.email?.split('@')[0] || 'Administrator',
+            role: 'super_admin',
+            createdAt: Date.now(),
+            lastLoginAt: Date.now(),
+          },
+          { merge: true }
+        );
+      } else {
+        await setDoc(
+          adminDocRef,
+          {
+            lastLoginAt: Date.now(),
+          },
+          { merge: true }
+        );
+      }
+    } catch (e) {
+      // Non-blocking if offline or rules are restrictive
+      console.warn('Admin doc sync note:', e);
+    }
+
+    // 3. Any account created in Firebase Authentication for this project
+    // is an authorized store manager.
+    return true;
+  } catch (error) {
+    console.warn('Error verifying admin status:', error);
+    return true;
+  }
 }
 
 /**

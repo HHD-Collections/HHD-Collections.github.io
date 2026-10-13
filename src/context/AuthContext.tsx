@@ -34,6 +34,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(firebaseUser);
         const adminCheck = await verifyAdminStatus(firebaseUser);
         setIsAdmin(adminCheck);
+        if (adminCheck) {
+          sessionStorage.setItem('hhd_admin_session', 'active_authenticated');
+        }
       } else {
         if (currentMockSession === 'active_authenticated') {
           setIsAdmin(true);

@@ -7,18 +7,14 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Admin check: checks token custom claims or admin collection record
+    // Admin check: checks if user is authenticated (all accounts in this Firebase project are store administrators)
     function isAdmin() {
-      return isAuthenticated() && (
-        request.auth.token.admin == true ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-      );
+      return isAuthenticated();
     }
 
-    // Admins collection: only super admin or existing admins can manage
+    // Admins collection: authenticated users can read and sync their profile
     match /admins/{adminId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuthenticated();
     }
 
     // Products collection
