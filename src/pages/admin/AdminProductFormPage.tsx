@@ -50,6 +50,7 @@ export const AdminProductFormPage: React.FC = () => {
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(isEditing);
 
@@ -181,6 +182,28 @@ export const AdminProductFormPage: React.FC = () => {
 
     setImages(newImagesList);
     setUploadProgress(null);
+  };
+
+  const handleAddImageUrl = () => {
+    const trimmed = imageUrlInput.trim();
+    if (!trimmed) return;
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('/')) {
+      setUploadError('Please provide a valid image URL (e.g. https://... or /assets/...)');
+      return;
+    }
+
+    const isFirstImage = images.length === 0;
+    const newImg: ProductImage = {
+      id: `img-url-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      url: trimmed,
+      altText: watch('name') || 'Product gallery image',
+      isPrimary: isFirstImage,
+      order: images.length + 1,
+    };
+
+    setImages((prev) => [...prev, newImg]);
+    setImageUrlInput('');
+    setUploadError(null);
   };
 
   const handleSetPrimary = (index: number) => {
@@ -373,6 +396,33 @@ export const AdminProductFormPage: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Add Image by URL fallback */}
+          <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
+            <div className="relative flex-1 w-full">
+              <input
+                type="url"
+                value={imageUrlInput}
+                onChange={(e) => setImageUrlInput(e.target.value)}
+                placeholder="Or paste an image URL directly (e.g. https://... or /assets/...)"
+                className="w-full text-xs rounded-xl bg-charcoal-50 dark:bg-charcoal-800 border border-charcoal-300 dark:border-charcoal-700 px-3.5 py-2.5 text-charcoal-900 dark:text-white placeholder-charcoal-400 focus:ring-2 focus:ring-brand-500 outline-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddImageUrl();
+                  }
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddImageUrl}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-charcoal-200 dark:bg-charcoal-700 hover:bg-brand-500 hover:text-white text-charcoal-800 dark:text-charcoal-200 text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add URL Image</span>
+            </button>
           </div>
 
           {/* Image Grid with Reorder, Primary Selector, and Alt Text */}

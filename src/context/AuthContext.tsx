@@ -28,16 +28,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check local admin mock session first for dev/bootstrap fallback
-    const mockSession = sessionStorage.getItem('hhd_admin_session');
-
     const unsubscribe = onAdminAuthChange(async (firebaseUser) => {
+      const currentMockSession = sessionStorage.getItem('hhd_admin_session');
       if (firebaseUser) {
         setUser(firebaseUser);
         const adminCheck = await verifyAdminStatus(firebaseUser);
         setIsAdmin(adminCheck);
       } else {
-        if (mockSession === 'active_authenticated') {
+        if (currentMockSession === 'active_authenticated') {
           setIsAdmin(true);
         } else {
           setUser(null);

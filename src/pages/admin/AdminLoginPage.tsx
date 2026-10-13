@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import {
   ShieldCheck,
   Lock,
@@ -26,8 +26,7 @@ export const AdminLoginPage: React.FC = () => {
 
   // If already authenticated, redirect straight to dashboard
   if (isAdmin) {
-    navigate('/admin', { replace: true });
-    return null;
+    return <Navigate to="/admin" replace />;
   }
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
