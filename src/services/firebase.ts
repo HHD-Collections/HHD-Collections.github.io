@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
+import { initializeFirestore, getFirestore, Firestore } from "firebase/firestore";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 import { getAnalytics, isSupported, Analytics } from "firebase/analytics";
 
@@ -23,7 +23,15 @@ export const isFirebaseConfigured = Boolean(
 
 export const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
+export const db: Firestore = (() => {
+  try {
+    return initializeFirestore(app, {
+      ignoreUndefinedProperties: true,
+    });
+  } catch (_) {
+    return getFirestore(app);
+  }
+})();
 export const storage: FirebaseStorage = getStorage(app);
 
 export const analyticsPromise: Promise<Analytics | null> = isSupported().then(

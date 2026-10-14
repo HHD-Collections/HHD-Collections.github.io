@@ -11,17 +11,27 @@ import {
   CloudUpload,
   CheckCircle2,
   ExternalLink,
+  MessageSquare,
+  Activity,
+  Database,
+  Users,
 } from 'lucide-react';
-import { Product, Category, Order } from '../../types';
+import { Product, Category, Order, ContactInquiry, ActivityLog } from '../../types';
 import { getProducts, seedCatalogToFirestore } from '../../services/productService';
 import { getCategories, seedCategoriesToFirestore } from '../../services/categoryService';
 import { getOrders } from '../../services/orderService';
-import { formatPrice } from '../../utils/formatters';
+import { getInquiries, getNewsletterSubscribers } from '../../services/inquiryService';
+import { getActivityLogs } from '../../services/activityLogService';
+import { DEFAULT_STORE_SETTINGS, saveStoreSettings } from '../../services/settingsService';
+import { formatPrice, formatDate } from '../../utils/formatters';
 
 export const AdminOverviewPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
+  const [subscriberCount, setSubscriberCount] = useState<number>(0);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [seedSuccess, setSeedSuccess] = useState<string | null>(null);
@@ -29,14 +39,20 @@ export const AdminOverviewPage: React.FC = () => {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [prods, cats, ords] = await Promise.all([
+        const [prods, cats, ords, inqs, subs, logs] = await Promise.all([
           getProducts(),
           getCategories(),
           getOrders(),
+          getInquiries(),
+          getNewsletterSubscribers(),
+          getActivityLogs(8),
         ]);
         setProducts(prods);
         setCategories(cats);
         setOrders(ords);
+        setInquiries(inqs);
+        setSubscriberCount(subs.length);
+        setActivityLogs(logs);
       } catch (e) {
         console.error('Error fetching admin stats:', e);
       } finally {
@@ -52,18 +68,33 @@ export const AdminOverviewPage: React.FC = () => {
   const lowStockProducts = products.filter((p) => p.stock > 0 && p.stock <= 20);
   const totalCategories = categories.length;
   const totalOrders = orders.length;
+  const unreadInquiries = inquiries.filter((i) => i.status === 'unread').length;
 
   const handleSeedDatabase = async () => {
-    if (!confirm('This will seed/sync all 14 initial products and categories into your Cloud Firestore database. Proceed?')) {
+    if (
+      !confirm(
+        'This will synchronize all 14 initial products, 4 categories, and store settings into your Cloud Firestore database. Proceed?'
+      )
+    ) {
       return;
     }
     setSeeding(true);
     setSeedSuccess(null);
     try {
-      await Promise.all([seedCatalogToFirestore(), seedCategoriesToFirestore()]);
-      setSeedSuccess('Successfully seeded 14 products & categories to Cloud Firestore!');
-      const prods = await getProducts();
+      await Promise.all([
+        seedCatalogToFirestore(),
+        seedCategoriesToFirestore(),
+        saveStoreSettings(DEFAULT_STORE_SETTINGS),
+      ]);
+      setSeedSuccess('Successfully synchronized all catalog data & settings to Cloud Firestore!');
+      const [prods, cats, logs] = await Promise.all([
+        getProducts(),
+        getCategories(),
+        getActivityLogs(8),
+      ]);
       setProducts(prods);
+      setCategories(cats);
+      setActivityLogs(logs);
     } catch (err: any) {
       alert(`Seeding failed: ${err.message}`);
     } finally {
@@ -88,11 +119,11 @@ export const AdminOverviewPage: React.FC = () => {
           <button
             onClick={handleSeedDatabase}
             disabled={seeding}
-            className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 rounded-xl bg-charcoal-800 hover:bg-charcoal-700 text-brand-300 text-xs font-semibold flex items-center justify-center space-x-2 border border-brand-500/30 transition-all"
-            title="Seed all 14 initial products to Cloud Firestore"
+            className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 rounded-xl bg-charcoal-800 hover:bg-charcoal-700 text-brand-300 text-xs font-semibold flex items-center justify-center space-x-2 border border-brand-500/30 transition-all shadow-sm"
+            title="Synchronize all products, categories, and settings to Cloud Firestore"
           >
             <CloudUpload className="w-4 h-4 text-brand-400" />
-            <span>{seeding ? 'Syncing...' : 'Sync to Firestore'}</span>
+            <span>{seeding ? 'Syncing to Firestore...' : 'Sync All to Firestore'}</span>
           </button>
 
           <Link
@@ -105,6 +136,37 @@ export const AdminOverviewPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Firestore Live Connection Status Banner */}
+      <div className="flex flex-wrap items-center justify-between p-3.5 px-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 text-xs gap-3">
+        <div className="flex items-center space-x-2.5">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span className="font-bold">Cloud Firestore Live</span>
+          <span className="text-charcoal-400 dark:text-charcoal-500 hidden md:inline">
+            • Project: hhd-collections
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[11px] text-charcoal-600 dark:text-charcoal-300">
+          <span>
+            <strong>{totalProducts}</strong> Products
+          </span>
+          <span>
+            <strong>{totalCategories}</strong> Categories
+          </span>
+          <span>
+            <strong>{totalOrders}</strong> Orders
+          </span>
+          <span>
+            <strong>{inquiries.length}</strong> Inquiries
+          </span>
+          <span>
+            <strong>{subscriberCount}</strong> VIP Subscribers
+          </span>
+        </div>
+      </div>
+
       {seedSuccess && (
         <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-700 text-emerald-300 text-xs flex items-center space-x-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -113,7 +175,7 @@ export const AdminOverviewPage: React.FC = () => {
       )}
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] sm:text-xs font-semibold text-charcoal-500">Total Products</span>
@@ -156,6 +218,21 @@ export const AdminOverviewPage: React.FC = () => {
         </div>
 
         <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] sm:text-xs font-semibold text-charcoal-500">Inquiries</span>
+            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+              <MessageSquare className="w-4 h-4" />
+            </div>
+          </div>
+          <span className="text-2xl sm:text-3xl font-bold font-serif text-charcoal-900 dark:text-white block">
+            {inquiries.length}
+          </span>
+          <span className="text-[10px] sm:text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+            {unreadInquiries} unread messages
+          </span>
+        </div>
+
+        <div className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] sm:text-xs font-semibold text-charcoal-500">Out of Stock</span>
             <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500">
@@ -329,6 +406,54 @@ export const AdminOverviewPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Cloud Firestore Live Activity Stream */}
+      <div className="p-6 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Activity className="w-5 h-5 text-brand-500" />
+            <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+              Cloud Firestore Activity Stream
+            </h3>
+          </div>
+          <span className="text-xs text-charcoal-400 font-mono">
+            Direct from collection 'activityLogs'
+          </span>
+        </div>
+
+        {activityLogs.length === 0 ? (
+          <p className="text-xs text-charcoal-400 py-4 text-center">
+            No activity logged yet. Store events (product changes, orders, inquiries) are synced to Cloud Firestore in real time.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {activityLogs.map((log) => (
+              <div
+                key={log.id}
+                className="p-3.5 rounded-xl bg-charcoal-50 dark:bg-charcoal-800/50 border border-charcoal-100 dark:border-charcoal-800 text-xs flex items-start space-x-3"
+              >
+                <div className="p-2 rounded-lg bg-brand-500/10 text-brand-500 flex-shrink-0 mt-0.5">
+                  <Database className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-charcoal-900 dark:text-white truncate">
+                      {log.action}
+                    </span>
+                    <span className="text-[10px] text-charcoal-400 whitespace-nowrap">
+                      {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-charcoal-500 mt-0.5 line-clamp-1">
+                    {log.details}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
+

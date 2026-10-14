@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, MessageCircle, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle, Clock, Send, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { useSettings } from '../../context/SettingsContext';
+import { createInquiry } from '../../services/inquiryService';
 
 export const ContactPage: React.FC = () => {
   const { settings } = useSettings();
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,9 +16,27 @@ export const ContactPage: React.FC = () => {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setErrorMsg(null);
+
+    try {
+      await createInquiry({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        subject: formData.subject.trim() || 'General Inquiry',
+        message: formData.message.trim(),
+      });
+      setSubmitted(true);
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (err: any) {
+      console.error('Failed to submit inquiry:', err);
+      setErrorMsg(err.message || 'Failed to send message. Please try WhatsApp or email directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleWhatsAppDirect = () => {
@@ -208,12 +229,29 @@ export const ContactPage: React.FC = () => {
                   />
                 </div>
 
+                {errorMsg && (
+                  <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 text-xs flex items-center space-x-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-6 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-luxury"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 px-6 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-luxury"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>Send Message</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Submitting to Firestore...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Send Message</span>
+                    </>
+                  )}
                 </button>
               </form>
             )}

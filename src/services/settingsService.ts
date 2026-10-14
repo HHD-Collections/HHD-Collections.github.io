@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 import { StoreSettings } from '../types';
+import { logActivity } from './activityLogService';
 
 export const SETTINGS_COLLECTION = 'settings';
 export const SETTINGS_DOC_ID = 'store_config';
@@ -135,6 +136,12 @@ export async function saveStoreSettings(
       setDoc(docRef, merged, { merge: true }),
       timeoutPromise,
     ]);
+
+    logActivity({
+      action: 'Updated store configuration settings',
+      entityType: 'settings',
+      details: `Saved store configuration to Cloud Firestore`,
+    }).catch(() => {});
 
     return {
       success: true,

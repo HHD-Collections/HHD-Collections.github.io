@@ -13,6 +13,7 @@ import { Category } from '../types';
 import { INITIAL_CATEGORIES } from '../data/initialCategories';
 import { generateSlug } from '../utils/formatters';
 import { cacheCategoriesInIDB, getCategoriesFromIDB } from './dbCache';
+import { logActivity } from './activityLogService';
 
 const CATEGORIES_COLLECTION = 'categories';
 const LOCAL_STORAGE_KEY = 'hhd_categories_cache';
@@ -47,6 +48,13 @@ export async function getCategories(): Promise<Category[]> {
           id: d.id,
           ...d.data(),
         })) as Category[];
+        saveLocalCategories(categories);
+      } else {
+        // If Firestore is empty, auto-seed initial categories so Firestore becomes active source
+        try {
+          await seedCategoriesToFirestore();
+          categories = [...INITIAL_CATEGORIES];
+        } catch (_) {}
       }
     } catch (e) {
       console.warn('Firestore categories fetch error, using local dataset', e);
@@ -88,6 +96,14 @@ export async function createCategory(
 
   const local = getLocalCategories();
   saveLocalCategories([...local, newCat]);
+
+  logActivity({
+    action: `Created category: ${newCat.name}`,
+    entityType: 'category',
+    entityId: newId,
+    details: `Added new category "${newCat.name}" with slug "${slug}"`,
+  }).catch(() => {});
+
   return newCat;
 }
 
@@ -111,10 +127,21 @@ export async function updateCategory(
 
   const local = getLocalCategories();
   saveLocalCategories(local.map((c) => (c.id === id ? updated : c)));
+
+  logActivity({
+    action: `Updated category: ${updated.name}`,
+    entityType: 'category',
+    entityId: id,
+    details: `Updated category attributes for "${updated.name}"`,
+  }).catch(() => {});
+
   return updated;
 }
 
 export async function deleteCategory(id: string): Promise<void> {
+  const all = await getCategories();
+  const existing = all.find((c) => c.id === id);
+
   if (isFirebaseConfigured) {
     try {
       await deleteDoc(doc(db, CATEGORIES_COLLECTION, id));
@@ -125,6 +152,13 @@ export async function deleteCategory(id: string): Promise<void> {
 
   const local = getLocalCategories();
   saveLocalCategories(local.filter((c) => c.id !== id));
+
+  logActivity({
+    action: `Deleted category: ${existing?.name || id}`,
+    entityType: 'category',
+    entityId: id,
+    details: `Category removed from store catalog`,
+  }).catch(() => {});
 }
 
 export async function seedCategoriesToFirestore(): Promise<{ count: number }> {

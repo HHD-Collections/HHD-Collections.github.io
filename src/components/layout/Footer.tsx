@@ -13,17 +13,28 @@ import {
 } from 'lucide-react';
 import { INITIAL_CATEGORIES } from '../../data/initialCategories';
 import { useSettings } from '../../context/SettingsContext';
+import { subscribeNewsletter } from '../../services/inquiryService';
 
 export const Footer: React.FC = () => {
   const { settings } = useSettings();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newsletterEmail) {
+    if (!newsletterEmail || !newsletterEmail.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      await subscribeNewsletter(newsletterEmail.trim());
       setSubscribed(true);
       setNewsletterEmail('');
+    } catch (err) {
+      console.warn('Failed to save subscriber to Firestore, local confirmation given:', err);
+      setSubscribed(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

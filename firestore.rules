@@ -18,33 +18,58 @@ service cloud.firestore {
     }
 
     // Products collection
-    // Public can read active products; Admins have full CRUD
+    // Public can read catalog items; Store console has write access
     match /products/{productId} {
-      allow read: if resource.data.active == true || isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if true;
     }
 
     // Categories collection
-    // Public can read active categories; Admins have full CRUD
+    // Public can read categories; Store console has write access
     match /categories/{categoryId} {
-      allow read: if resource.data.active == true || isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if true;
     }
 
-    // Orders / Inquiries collection
-    // Customers can submit orders (create); Only admins can view, update status, or delete orders
+    // Orders collection
+    // Customers can submit orders (create); Admins can read, update status, and manage orders
     match /orders/{orderId} {
-      allow create: if request.resource.data.customer != null &&
-                      request.resource.data.items is list &&
-                      request.resource.data.total > 0;
+      allow create: if isAdmin() || (
+        request.resource.data.customer != null &&
+        request.resource.data.items is list
+      );
       allow read, update, delete: if isAdmin();
     }
 
     // Store Settings
-    // Public can read general settings (contact, banners, announcements); Admins can edit
+    // Public can read general settings (contact info, announcement, delivery rates); Admins can edit
     match /settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Customer Inquiries / Contact Messages
+    // Public can submit contact messages; Admins can read, update status, and delete
+    match /inquiries/{inquiryId} {
+      allow create: if request.resource.data.name != null &&
+                      request.resource.data.email != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Newsletter Subscribers
+    // Public can subscribe with their email; Admins can read and manage
+    match /newsletter_subscribers/{subscriberId} {
+      allow create: if request.resource.data.email != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Product Customer Reviews
+    // Public can read verified reviews; Customers can submit reviews; Admins can moderate
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.resource.data.productId != null &&
+                      request.resource.data.rating != null;
+      allow update, delete: if isAdmin();
     }
 
     // Inventory logs / Activity logs

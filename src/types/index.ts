@@ -127,3 +127,45 @@ export interface StoreSettings {
   };
   updatedAt?: string | number;
 }
+
+export type InquiryStatus = 'unread' | 'read' | 'replied' | 'archived';
+
+export interface ContactInquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  status: InquiryStatus;
+  createdAt: number;
+  repliedAt?: number;
+}
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  subscribedAt: number;
+  active: boolean;
+}
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  productName?: string;
+  authorName: string;
+  rating: number; // 1 to 5
+  comment: string;
+  createdAt: number;
+  verified?: boolean;
+}
+
+export interface ActivityLog {
+  id: string;
+  action: string;
+  entityType: 'product' | 'category' | 'order' | 'settings' | 'inquiry' | 'database';
+  entityId?: string;
+  details: string;
+  performedBy?: string;
+  timestamp: number;
+}

@@ -17,6 +17,7 @@ import { Product } from '../types';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 import { generateSlug } from '../utils/formatters';
 import { cacheProductsInIDB, getProductsFromIDB } from './dbCache';
+import { logActivity } from './activityLogService';
 
 const PRODUCTS_COLLECTION = 'products';
 const LOCAL_STORAGE_KEY = 'hhd_products_cache';
@@ -124,6 +125,13 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
           id: d.id,
           ...d.data(),
         })) as Product[];
+        saveLocalProducts(products);
+      } else if (!activeOnly && (!categorySlug || categorySlug === 'all') && !searchQuery) {
+        // Auto-seed initial catalog if Firestore is completely empty
+        try {
+          await seedCatalogToFirestore();
+          products = [...INITIAL_PRODUCTS];
+        } catch (_) {}
       }
     } catch (error) {
       console.warn('Firestore fetch failed, falling back to local dataset:', error);
@@ -256,6 +264,13 @@ export async function getProductById(id: string): Promise<Product | null> {
 }
 
 /**
+ * Sanitize object to remove any undefined properties so Firestore writes never fail.
+ */
+function cleanFirestoreData<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+/**
  * Create a new product in Firestore (and sync to local cache)
  */
 export async function createProduct(productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
@@ -274,9 +289,12 @@ export async function createProduct(productData: Omit<Product, 'id' | 'createdAt
   if (isFirebaseConfigured) {
     try {
       const docRef = doc(db, PRODUCTS_COLLECTION, newId);
-      await setDoc(docRef, newProduct);
-    } catch (e) {
-      console.warn('Failed to write product to Firestore, saving locally:', e);
+      const cleaned = cleanFirestoreData(newProduct);
+      await setDoc(docRef, cleaned);
+      console.log(`[Firestore] Product "${newProduct.name}" (${newId}) stored in '${PRODUCTS_COLLECTION}'.`);
+    } catch (e: any) {
+      console.error('[Firestore Error] Failed to write product to Cloud Firestore:', e);
+      throw new Error(`Failed to store product in Cloud Firestore: ${e?.message || e}`);
     }
   }
 
@@ -285,6 +303,13 @@ export async function createProduct(productData: Omit<Product, 'id' | 'createdAt
   const baseList = idbList.length > 0 ? idbList : getLocalProducts();
   const updatedList = [newProduct, ...baseList.filter((p) => p.id !== newId)];
   saveLocalProducts(updatedList);
+
+  logActivity({
+    action: `Added product: ${newProduct.name}`,
+    entityType: 'product',
+    entityId: newId,
+    details: `Created SKU ${newProduct.sku} in ${newProduct.category}`,
+  }).catch(() => {});
 
   return newProduct;
 }
@@ -308,9 +333,12 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
   if (isFirebaseConfigured) {
     try {
       const docRef = doc(db, PRODUCTS_COLLECTION, id);
-      await updateDoc(docRef, { ...updates, updatedAt: now });
-    } catch (e) {
-      console.warn('Failed to update product in Firestore, updating locally:', e);
+      const cleaned = cleanFirestoreData({ ...updates, updatedAt: now });
+      await updateDoc(docRef, cleaned);
+      console.log(`[Firestore] Product "${updatedProduct.name}" (${id}) updated in '${PRODUCTS_COLLECTION}'.`);
+    } catch (e: any) {
+      console.error('[Firestore Error] Failed to update product in Cloud Firestore:', e);
+      throw new Error(`Failed to update product in Cloud Firestore: ${e?.message || e}`);
     }
   }
 
@@ -320,6 +348,13 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
   const updatedList = baseList.map((p) => (p.id === id ? updatedProduct : p));
   saveLocalProducts(updatedList);
 
+  logActivity({
+    action: `Updated product: ${updatedProduct.name}`,
+    entityType: 'product',
+    entityId: id,
+    details: `Updated details/stock (${updatedProduct.stock})`,
+  }).catch(() => {});
+
   return updatedProduct;
 }
 
@@ -327,6 +362,7 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
  * Delete a product
  */
 export async function deleteProduct(id: string): Promise<void> {
+  const existing = await getProductById(id);
   recordDeletedProductId(id);
 
   if (isFirebaseConfigured) {
@@ -342,6 +378,13 @@ export async function deleteProduct(id: string): Promise<void> {
   const baseList = idbList.length > 0 ? idbList : getLocalProducts();
   const updatedList = baseList.filter((p) => p.id !== id);
   saveLocalProducts(updatedList);
+
+  logActivity({
+    action: `Deleted product: ${existing?.name || id}`,
+    entityType: 'product',
+    entityId: id,
+    details: `Product removed from store catalog`,
+  }).catch(() => {});
 }
 
 /**
@@ -368,6 +411,12 @@ export async function deleteProducts(ids: string[]): Promise<void> {
   const idSet = new Set(ids);
   const updatedList = baseList.filter((p) => !idSet.has(p.id));
   saveLocalProducts(updatedList);
+
+  logActivity({
+    action: `Bulk deleted ${ids.length} products`,
+    entityType: 'product',
+    details: `Removed products: ${ids.join(', ')}`,
+  }).catch(() => {});
 }
 
 /**
@@ -382,12 +431,21 @@ export async function duplicateProduct(id: string): Promise<Product> {
 
   const { id: _, createdAt: __, updatedAt: ___, ...data } = original;
 
-  return createProduct({
+  const duplicated = await createProduct({
     ...data,
     name: duplicateName,
     slug: duplicateSlug,
     sku: `${original.sku}-COPY`,
   });
+
+  logActivity({
+    action: `Duplicated product: ${original.name}`,
+    entityType: 'product',
+    entityId: duplicated.id,
+    details: `Created copy "${duplicateName}"`,
+  }).catch(() => {});
+
+  return duplicated;
 }
 
 /**
@@ -401,10 +459,17 @@ export async function seedCatalogToFirestore(): Promise<{ count: number }> {
   const batch = writeBatch(db);
   for (const product of INITIAL_PRODUCTS) {
     const docRef = doc(db, PRODUCTS_COLLECTION, product.id);
-    batch.set(docRef, product);
+    batch.set(docRef, cleanFirestoreData(product));
   }
 
   await batch.commit();
   saveLocalProducts(INITIAL_PRODUCTS);
+
+  logActivity({
+    action: `Seeded ${INITIAL_PRODUCTS.length} products to Cloud Firestore`,
+    entityType: 'database',
+    details: `Official catalog synchronized to Cloud Firestore`,
+  }).catch(() => {});
+
   return { count: INITIAL_PRODUCTS.length };
 }

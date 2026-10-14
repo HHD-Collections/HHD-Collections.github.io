@@ -5,11 +5,13 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   orderBy,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 import { Order, OrderStatus } from '../types';
+import { logActivity } from './activityLogService';
 
 const ORDERS_COLLECTION = 'orders';
 const LOCAL_ORDERS_KEY = 'hhd_orders_cache';
@@ -96,6 +98,13 @@ export async function createOrder(
   const existing = getLocalOrders();
   saveLocalOrders([newOrder, ...existing]);
 
+  logActivity({
+    action: `New order placed: ${newOrder.orderNumber}`,
+    entityType: 'order',
+    entityId: newId,
+    details: `Order for Rs. ${newOrder.total.toLocaleString()} placed by ${newOrder.customer.fullName} (${newOrder.customer.city})`,
+  }).catch(() => {});
+
   return newOrder;
 }
 
@@ -112,6 +121,7 @@ export async function getOrders(): Promise<Order[]> {
           id: d.id,
           ...d.data(),
         })) as Order[];
+        saveLocalOrders(orders);
       }
     } catch (e) {
       console.warn('Firestore orders fetch failed, reading local orders:', e);
@@ -158,5 +168,34 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
 
   const local = getLocalOrders();
   saveLocalOrders(local.map((o) => (o.id === id ? updated : o)));
+
+  logActivity({
+    action: `Updated order ${existing.orderNumber} status to "${status}"`,
+    entityType: 'order',
+    entityId: id,
+    details: `Order status changed from ${existing.status} to ${status}`,
+  }).catch(() => {});
+
   return updated;
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  const existing = await getOrderById(id);
+  if (isFirebaseConfigured) {
+    try {
+      await deleteDoc(doc(db, ORDERS_COLLECTION, id));
+    } catch (e) {
+      console.warn('Failed to delete order from Firestore:', e);
+    }
+  }
+
+  const local = getLocalOrders();
+  saveLocalOrders(local.filter((o) => o.id !== id && o.orderNumber !== id));
+
+  logActivity({
+    action: `Deleted order ${existing?.orderNumber || id}`,
+    entityType: 'order',
+    entityId: id,
+    details: `Order removed from store records`,
+  }).catch(() => {});
 }

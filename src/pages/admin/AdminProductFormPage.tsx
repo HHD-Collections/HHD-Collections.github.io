@@ -334,25 +334,28 @@ export const AdminProductFormPage: React.FC = () => {
       .filter(Boolean);
 
     try {
-      const payload = {
-        name: data.name,
-        slug: data.slug,
-        sku: data.sku,
+      const payload: any = {
+        name: data.name.trim(),
+        slug: data.slug.trim(),
+        sku: data.sku.trim(),
         category: data.category,
         categorySlug: data.categorySlug,
-        regularPrice: data.regularPrice,
-        salePrice: data.salePrice || undefined,
-        stock: data.stock,
-        inStock: data.inStock,
-        featured: data.featured,
-        active: data.active,
-        shortDescription: data.shortDescription,
-        description: data.description,
+        regularPrice: Number(data.regularPrice),
+        stock: Number(data.stock),
+        inStock: Boolean(data.inStock),
+        featured: Boolean(data.featured),
+        active: Boolean(data.active),
+        shortDescription: data.shortDescription.trim(),
+        description: data.description.trim(),
         tags: tagArray,
         images,
         primaryImage: primaryImg.url,
         currency: 'PKR',
       };
+
+      if (data.salePrice && Number(data.salePrice) > 0) {
+        payload.salePrice = Number(data.salePrice);
+      }
 
       if (isEditing && id) {
         await updateProduct(id, payload);
@@ -363,7 +366,7 @@ export const AdminProductFormPage: React.FC = () => {
       navigate('/admin/products');
     } catch (err: any) {
       console.error('Save error:', err);
-      setUploadError(err.message || 'Failed to save product');
+      setUploadError(err.message || 'Failed to save product to Cloud Firestore');
     } finally {
       setIsSaving(false);
     }

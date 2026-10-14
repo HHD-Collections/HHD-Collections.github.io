@@ -15,8 +15,9 @@ import {
   Star,
   Sparkles,
 } from 'lucide-react';
-import { Product } from '../../types';
+import { Product, ProductReview } from '../../types';
 import { getProductBySlug, getProducts } from '../../services/productService';
+import { getProductReviews, addProductReview } from '../../services/reviewService';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -36,9 +37,17 @@ export const ProductDetailPage: React.FC = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'shipping'>('desc');
+  const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'shipping' | 'reviews'>('desc');
   const [copiedLink, setCopiedLink] = useState(false);
   const [addedSuccess, setAddedSuccess] = useState(false);
+
+  // Reviews state
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const [reviewName, setReviewName] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   useEffect(() => {
     async function loadProduct() {
@@ -49,12 +58,16 @@ export const ProductDetailPage: React.FC = () => {
         setProduct(item);
 
         if (item) {
-          const related = await getProducts({
-            categorySlug: item.categorySlug,
-            activeOnly: true,
-            limitCount: 4,
-          });
+          const [related, fetchedReviews] = await Promise.all([
+            getProducts({
+              categorySlug: item.categorySlug,
+              activeOnly: true,
+              limitCount: 4,
+            }),
+            getProductReviews(item.id),
+          ]);
           setRelatedProducts(related.filter((p) => p.id !== item.id));
+          setReviews(fetchedReviews);
         }
       } catch (err) {
         console.error('Failed to load product:', err);
@@ -66,6 +79,32 @@ export const ProductDetailPage: React.FC = () => {
     setQuantity(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [slug]);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!product || !reviewName.trim() || !reviewComment.trim()) return;
+
+    setSubmittingReview(true);
+    try {
+      const newRev = await addProductReview({
+        productId: product.id,
+        productName: product.name,
+        authorName: reviewName.trim(),
+        rating: Number(reviewRating),
+        comment: reviewComment.trim(),
+      });
+      setReviews((prev) => [newRev, ...prev]);
+      setReviewSuccess(true);
+      setReviewName('');
+      setReviewComment('');
+      setReviewRating(5);
+      setTimeout(() => setReviewSuccess(false), 4000);
+    } catch (err) {
+      console.error('Failed to submit review:', err);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -388,6 +427,16 @@ export const ProductDetailPage: React.FC = () => {
           >
             Shipping & Return Policy
           </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`pb-3 text-xs sm:text-sm font-semibold transition-colors border-b-2 flex-shrink-0 ${
+              activeTab === 'reviews'
+                ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                : 'border-transparent text-charcoal-500 hover:text-charcoal-800 dark:hover:text-white'
+            }`}
+          >
+            Verified Reviews ({reviews.length > 0 ? reviews.length : (product.reviewCount || 0)})
+          </button>
         </div>
 
         <div className="py-6">
@@ -444,6 +493,135 @@ export const ProductDetailPage: React.FC = () => {
               <p>
                 <strong>7-Day Checking Warranty:</strong> In the rare event of damage in transit or functional defect, contact our support team on WhatsApp within 7 days of receiving your order for an immediate hassle-free replacement.
               </p>
+            </div>
+          )}
+
+          {activeTab === 'reviews' && (
+            <div className="space-y-8 max-w-3xl">
+              {/* Write Review Form */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-charcoal-50 dark:bg-charcoal-800/60 border border-charcoal-200 dark:border-charcoal-800">
+                <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white mb-2">
+                  Leave a Verified Review
+                </h3>
+                <p className="text-xs text-charcoal-500 mb-4">
+                  Share your experience with this item. Your review is stored securely in our database.
+                </p>
+
+                {reviewSuccess && (
+                  <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+                    ✓ Thank you! Your review has been saved to Cloud Firestore.
+                  </div>
+                )}
+
+                <form onSubmit={handleReviewSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-charcoal-700 dark:text-charcoal-300 mb-1">
+                        Your Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Ayesha Khan"
+                        value={reviewName}
+                        onChange={(e) => setReviewName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-700 text-xs text-charcoal-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-charcoal-700 dark:text-charcoal-300 mb-1">
+                        Rating (Stars) *
+                      </label>
+                      <select
+                        value={reviewRating}
+                        onChange={(e) => setReviewRating(Number(e.target.value))}
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-700 text-xs text-charcoal-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      >
+                        <option value={5}>★★★★★ (5 Stars - Outstanding)</option>
+                        <option value={4}>★★★★☆ (4 Stars - Very Good)</option>
+                        <option value={3}>★★★☆☆ (3 Stars - Average)</option>
+                        <option value={2}>★★☆☆☆ (2 Stars - Below Expectations)</option>
+                        <option value={1}>★☆☆☆☆ (1 Star - Poor)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-charcoal-700 dark:text-charcoal-300 mb-1">
+                      Your Comments & Experience *
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="Describe the build quality, packing, and overall satisfaction..."
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-700 text-xs text-charcoal-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={submittingReview}
+                    className="px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white font-semibold text-xs transition-all shadow-sm flex items-center space-x-1.5"
+                  >
+                    <span>{submittingReview ? 'Submitting to Firestore...' : 'Submit Review'}</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Reviews List */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-sm text-charcoal-900 dark:text-white">
+                  Customer Feedback ({reviews.length})
+                </h4>
+
+                {reviews.length === 0 ? (
+                  <div className="p-6 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 text-center space-y-1">
+                    <p className="text-xs text-charcoal-500">
+                      No customer reviews yet. Be the first to review this product!
+                    </p>
+                  </div>
+                ) : (
+                  reviews.map((rev) => (
+                    <div
+                      key={rev.id}
+                      className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 space-y-2 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-xs text-charcoal-900 dark:text-white">
+                            {rev.authorName}
+                          </span>
+                          {rev.verified && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold">
+                              ✓ Verified Buyer
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-charcoal-400">
+                          {new Date(rev.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center text-amber-500 text-xs">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-3.5 h-3.5 ${
+                              s <= rev.rating ? 'fill-current' : 'text-charcoal-300 dark:text-charcoal-700'
+                            }`}
+                          />
+                        ))}
+                      </div>
+
+                      <p className="text-xs text-charcoal-700 dark:text-charcoal-300 leading-relaxed">
+                        {rev.comment}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </div>
