@@ -29,7 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAdminAuthChange(async (firebaseUser) => {
-      const currentMockSession = sessionStorage.getItem('hhd_admin_session');
       if (firebaseUser) {
         setUser(firebaseUser);
         const adminCheck = await verifyAdminStatus(firebaseUser);
@@ -38,12 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           sessionStorage.setItem('hhd_admin_session', 'active_authenticated');
         }
       } else {
-        if (currentMockSession === 'active_authenticated') {
-          setIsAdmin(true);
-        } else {
-          setUser(null);
-          setIsAdmin(false);
-        }
+        setUser(null);
+        setIsAdmin(false);
+        sessionStorage.removeItem('hhd_admin_session');
       }
       setIsLoading(false);
     });
@@ -69,8 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const bootstrapLogin = () => {
-    sessionStorage.setItem('hhd_admin_session', 'active_authenticated');
-    setIsAdmin(true);
+    console.warn('Bootstrap login access has been permanently disabled.');
   };
 
   const logout = async () => {
