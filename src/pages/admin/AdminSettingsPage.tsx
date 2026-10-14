@@ -12,6 +12,7 @@ import {
   Truck,
   Database,
   ExternalLink,
+  Landmark,
 } from 'lucide-react';
 import { seedCatalogToFirestore } from '../../services/productService';
 import { seedCategoriesToFirestore } from '../../services/categoryService';
@@ -28,6 +29,12 @@ export const AdminSettingsPage: React.FC = () => {
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(settings.freeShippingThreshold);
   const [deliveryCharge, setDeliveryCharge] = useState(settings.standardShippingFee);
   const [announcement, setAnnouncement] = useState(settings.announcementBarText);
+
+  // Bank details state
+  const [bankName, setBankName] = useState(settings.bankDetails?.bankName || '');
+  const [bankAccountTitle, setBankAccountTitle] = useState(settings.bankDetails?.accountTitle || '');
+  const [bankAccountNumber, setBankAccountNumber] = useState(settings.bankDetails?.accountNumber || '');
+  const [bankIban, setBankIban] = useState(settings.bankDetails?.iban || '');
 
   const [seeding, setSeeding] = useState(false);
   const [seedStatus, setSeedStatus] = useState<string | null>(null);
@@ -50,6 +57,10 @@ export const AdminSettingsPage: React.FC = () => {
         settings.announcementBarText ||
           'Free Delivery Across Pakistan on Orders Over Rs. 3,000 | Cash on Delivery Available'
       );
+      setBankName(settings.bankDetails?.bankName || '');
+      setBankAccountTitle(settings.bankDetails?.accountTitle || '');
+      setBankAccountNumber(settings.bankDetails?.accountNumber || '');
+      setBankIban(settings.bankDetails?.iban || '');
     }
   }, [settings, settingsLoading]);
 
@@ -103,6 +114,12 @@ export const AdminSettingsPage: React.FC = () => {
         announcementBarText: announcement.trim(),
         freeShippingThreshold: Number(freeShippingThreshold) || 0,
         standardShippingFee: Number(deliveryCharge) || 0,
+        bankDetails: {
+          bankName: bankName.trim(),
+          accountTitle: bankAccountTitle.trim(),
+          accountNumber: bankAccountNumber.trim(),
+          iban: bankIban.trim(),
+        },
       });
 
       if (res.firestoreSynced) {
@@ -325,6 +342,77 @@ export const AdminSettingsPage: React.FC = () => {
               <p className="text-[11px] text-charcoal-400">
                 Applied to orders below the free delivery threshold.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* BANK ACCOUNT & DIRECT TRANSFER DETAILS */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-2xl bg-brand-500/10 text-brand-500 flex-shrink-0">
+              <Landmark className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+                Bank Account Details (Direct Bank Transfer)
+              </h3>
+              <p className="text-xs text-charcoal-500 mt-0.5">
+                Customers selecting Direct Bank Transfer at checkout will receive these official payment details.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-charcoal-700 dark:text-charcoal-300">
+                Bank Name
+              </label>
+              <input
+                type="text"
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-charcoal-50 dark:bg-charcoal-800 border border-charcoal-200 dark:border-charcoal-700 text-xs text-charcoal-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                placeholder="e.g. Meezan Bank, HBL, Bank Alfalah"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-charcoal-700 dark:text-charcoal-300">
+                Bank Account Title
+              </label>
+              <input
+                type="text"
+                value={bankAccountTitle}
+                onChange={(e) => setBankAccountTitle(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-charcoal-50 dark:bg-charcoal-800 border border-charcoal-200 dark:border-charcoal-700 text-xs text-charcoal-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                placeholder="e.g. Murtuza or HHD Collections"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-charcoal-700 dark:text-charcoal-300">
+                Bank Account NO Number
+              </label>
+              <input
+                type="text"
+                value={bankAccountNumber}
+                onChange={(e) => setBankAccountNumber(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-charcoal-50 dark:bg-charcoal-800 border border-charcoal-200 dark:border-charcoal-700 text-xs text-charcoal-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
+                placeholder="e.g. 01020304050607"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-charcoal-700 dark:text-charcoal-300">
+                Bank Account IBAN Number
+              </label>
+              <input
+                type="text"
+                value={bankIban}
+                onChange={(e) => setBankIban(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-charcoal-50 dark:bg-charcoal-800 border border-charcoal-200 dark:border-charcoal-700 text-xs text-charcoal-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase"
+                placeholder="e.g. PK00MEZN0000000102030405"
+              />
             </div>
           </div>
         </div>

@@ -18,6 +18,12 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   announcementBarText: 'Free Delivery Across Pakistan on Orders Over Rs. 3,000 | Cash on Delivery Available',
   announcementActive: true,
   codEnabled: true,
+  bankDetails: {
+    bankName: '',
+    accountTitle: '',
+    accountNumber: '',
+    iban: '',
+  },
 };
 
 /**

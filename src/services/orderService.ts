@@ -56,7 +56,13 @@ export function buildWhatsAppOrderUrl(order: Order, whatsappNumber: string = '+9
     `*Subtotal:* Rs. ${order.subtotal.toLocaleString()}\n` +
     `*Delivery Fee:* Rs. ${order.shippingFee.toLocaleString()}\n` +
     `*Total Payable:* Rs. ${order.total.toLocaleString()}\n` +
-    `*Payment Method:* ${order.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : order.paymentMethod.toUpperCase()}\n\n` +
+    `*Payment Method:* ${
+      order.paymentMethod === 'cod'
+        ? 'Cash on Delivery (COD)'
+        : order.paymentMethod === 'bank_transfer'
+        ? 'Direct Bank Transfer'
+        : 'WhatsApp Direct Order'
+    }\n\n` +
     `Please confirm my order dispatch. Thank you!`;
 
   return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;

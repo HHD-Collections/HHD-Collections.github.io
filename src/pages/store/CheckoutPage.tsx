@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Printer,
   ChevronDown,
+  Landmark,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -152,8 +153,12 @@ export const CheckoutPage: React.FC = () => {
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-charcoal-200 dark:border-charcoal-700 text-xs">
               <span className="text-charcoal-500">Payment Option:</span>
-              <span className="font-bold text-charcoal-900 dark:text-white uppercase">
-                {completedOrder.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : completedOrder.paymentMethod}
+              <span className="font-bold text-charcoal-900 dark:text-white">
+                {completedOrder.paymentMethod === 'cod'
+                  ? 'Cash on Delivery (COD)'
+                  : completedOrder.paymentMethod === 'bank_transfer'
+                  ? 'Direct Bank Transfer'
+                  : 'WhatsApp Direct Order'}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm font-bold">
@@ -162,6 +167,44 @@ export const CheckoutPage: React.FC = () => {
                 {formatPrice(completedOrder.total)}
               </span>
             </div>
+
+            {completedOrder.paymentMethod === 'bank_transfer' && settings.bankDetails && (
+              <div className="pt-3 mt-3 border-t border-charcoal-200 dark:border-charcoal-700 space-y-2 text-xs">
+                <div className="flex items-center space-x-2 text-brand-600 dark:text-brand-400 font-bold">
+                  <Landmark className="w-4 h-4" />
+                  <span>Please Complete Payment to Our Bank Account:</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-700 space-y-1.5 text-[11px]">
+                  {settings.bankDetails.bankName && (
+                    <div className="flex justify-between">
+                      <span className="text-charcoal-400">Bank Name:</span>
+                      <strong className="text-charcoal-900 dark:text-white font-mono">{settings.bankDetails.bankName}</strong>
+                    </div>
+                  )}
+                  {settings.bankDetails.accountTitle && (
+                    <div className="flex justify-between">
+                      <span className="text-charcoal-400">Account Title:</span>
+                      <strong className="text-charcoal-900 dark:text-white font-mono">{settings.bankDetails.accountTitle}</strong>
+                    </div>
+                  )}
+                  {settings.bankDetails.accountNumber && (
+                    <div className="flex justify-between">
+                      <span className="text-charcoal-400">Account NO:</span>
+                      <strong className="text-charcoal-900 dark:text-white font-mono select-all">{settings.bankDetails.accountNumber}</strong>
+                    </div>
+                  )}
+                  {settings.bankDetails.iban && (
+                    <div className="flex justify-between">
+                      <span className="text-charcoal-400">IBAN:</span>
+                      <strong className="text-charcoal-900 dark:text-white font-mono select-all">{settings.bankDetails.iban}</strong>
+                    </div>
+                  )}
+                </div>
+                <p className="text-[10px] text-charcoal-400">
+                  After transfer, please click "Confirm on WhatsApp Now" below to send your transfer receipt.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Action buttons */}
@@ -459,13 +502,51 @@ export const CheckoutPage: React.FC = () => {
                   {...register('paymentMethod')}
                   className="mt-1 text-brand-500 focus:ring-brand-500"
                 />
-                <div>
+                <div className="flex-1">
                   <span className="font-bold text-xs sm:text-sm text-charcoal-900 dark:text-white block">
-                    Direct Bank Transfer / EasyPaisa / JazzCash
+                    Direct Bank Transfer
                   </span>
                   <span className="text-xs text-charcoal-500 leading-relaxed block mt-0.5">
-                    Transfer directly to our corporate bank account. Details provided upon placement.
+                    Transfer directly to our corporate bank account. Details provided below.
                   </span>
+
+                  {selectedPaymentMethod === 'bank_transfer' && settings.bankDetails && (
+                    <div className="mt-3 p-3.5 rounded-xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-700 text-xs space-y-2 animate-fade-in">
+                      <div className="flex items-center space-x-2 text-brand-600 dark:text-brand-400 font-bold">
+                        <Landmark className="w-4 h-4" />
+                        <span>Store Bank Account Details</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        {settings.bankDetails.bankName && (
+                          <div>
+                            <span className="text-charcoal-400 block">Bank Name:</span>
+                            <strong className="text-charcoal-900 dark:text-white font-mono">{settings.bankDetails.bankName}</strong>
+                          </div>
+                        )}
+                        {settings.bankDetails.accountTitle && (
+                          <div>
+                            <span className="text-charcoal-400 block">Account Title:</span>
+                            <strong className="text-charcoal-900 dark:text-white font-mono">{settings.bankDetails.accountTitle}</strong>
+                          </div>
+                        )}
+                        {settings.bankDetails.accountNumber && (
+                          <div>
+                            <span className="text-charcoal-400 block">Account NO:</span>
+                            <strong className="text-charcoal-900 dark:text-white font-mono select-all">{settings.bankDetails.accountNumber}</strong>
+                          </div>
+                        )}
+                        {settings.bankDetails.iban && (
+                          <div className="sm:col-span-2">
+                            <span className="text-charcoal-400 block">IBAN:</span>
+                            <strong className="text-charcoal-900 dark:text-white font-mono select-all">{settings.bankDetails.iban}</strong>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-charcoal-400 pt-1 border-t border-charcoal-100 dark:border-charcoal-800">
+                        Please share transaction proof on WhatsApp after placing your order.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </label>
             </div>
