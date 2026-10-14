@@ -338,10 +338,10 @@ export const AdminProductFormPage: React.FC = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* SECTION 1: CRITICAL MULTIPLE IMAGES MANAGER */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-charcoal-100 dark:border-charcoal-800 pb-3">
+        <div className="p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-charcoal-100 dark:border-charcoal-800 pb-3 gap-2">
             <div>
-              <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white flex items-center">
+              <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal-900 dark:text-white flex items-center">
                 <ImageIcon className="w-5 h-5 mr-2 text-brand-500" />
                 Product Image Gallery (Multiple Images)
               </h3>
@@ -349,7 +349,7 @@ export const AdminProductFormPage: React.FC = () => {
                 Upload multiple images. Select the primary hero image and reorder thumbnails.
               </p>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-500/10 text-brand-500">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-500/10 text-brand-500 w-fit">
               {images.length} Images
             </span>
           </div>
@@ -362,7 +362,7 @@ export const AdminProductFormPage: React.FC = () => {
               handleFilesSelected(e.dataTransfer.files);
             }}
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-charcoal-300 dark:border-charcoal-700 hover:border-brand-500 rounded-3xl p-8 text-center cursor-pointer transition-colors bg-charcoal-50/50 dark:bg-charcoal-800/30"
+            className="border-2 border-dashed border-charcoal-300 dark:border-charcoal-700 hover:border-brand-500 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-center cursor-pointer transition-colors bg-charcoal-50/50 dark:bg-charcoal-800/30"
           >
             <input
               type="file"
@@ -522,8 +522,8 @@ export const AdminProductFormPage: React.FC = () => {
         </div>
 
         {/* SECTION 2: BASIC PRODUCT INFORMATION */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
-          <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+        <div className="p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
+          <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal-900 dark:text-white">
             General Information
           </h3>
 
@@ -628,8 +628,8 @@ export const AdminProductFormPage: React.FC = () => {
         </div>
 
         {/* SECTION 3: PRICING & INVENTORY */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
-          <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+        <div className="p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
+          <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal-900 dark:text-white">
             Pricing & Stock
           </h3>
 
@@ -677,7 +677,7 @@ export const AdminProductFormPage: React.FC = () => {
           </div>
 
           {/* Visibility and Featured Flags */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-charcoal-100 dark:border-charcoal-800">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-charcoal-100 dark:border-charcoal-800">
             <label className="flex items-center space-x-3 p-3 rounded-xl bg-charcoal-50 dark:bg-charcoal-800/40 cursor-pointer">
               <input
                 type="checkbox"
@@ -714,10 +714,10 @@ export const AdminProductFormPage: React.FC = () => {
         </div>
 
         {/* Submit Actions */}
-        <div className="flex items-center justify-end space-x-4 pt-4">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:space-x-4 pt-4">
           <Link
             to="/admin/products"
-            className="px-6 py-3 rounded-xl border border-charcoal-300 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200 hover:bg-charcoal-100"
+            className="w-full sm:w-auto text-center px-6 py-3 rounded-xl border border-charcoal-300 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200 hover:bg-charcoal-100"
           >
             Cancel
           </Link>
@@ -725,7 +725,7 @@ export const AdminProductFormPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSaving}
-            className="px-8 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold shadow-luxury disabled:opacity-70 transition-all flex items-center space-x-2"
+            className="w-full sm:w-auto px-8 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold shadow-luxury disabled:opacity-70 transition-all flex items-center justify-center space-x-2"
           >
             {isSaving ? (
               <span>Saving Product...</span>

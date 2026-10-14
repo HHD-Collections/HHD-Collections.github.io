@@ -115,94 +115,164 @@ export const AdminOrdersPage: React.FC = () => {
             No orders found under this status.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-charcoal-50 dark:bg-charcoal-800/60 border-b border-charcoal-200 dark:border-charcoal-800 text-charcoal-400">
-                <tr>
-                  <th className="py-3 px-4 font-semibold">Order Ref</th>
-                  <th className="py-3 px-4 font-semibold">Customer</th>
-                  <th className="py-3 px-4 font-semibold">City</th>
-                  <th className="py-3 px-4 font-semibold">Items</th>
-                  <th className="py-3 px-4 font-semibold">Total</th>
-                  <th className="py-3 px-4 font-semibold text-center">Status</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-charcoal-100 dark:divide-charcoal-800">
-                {filteredOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="hover:bg-charcoal-50/50 dark:hover:bg-charcoal-800/40 transition-colors"
-                  >
-                    <td className="py-3 px-4 font-mono font-bold text-charcoal-900 dark:text-white">
-                      {order.orderNumber}
-                      <span className="block text-[10px] text-charcoal-400 font-sans font-normal">
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-charcoal-50 dark:bg-charcoal-800/60 border-b border-charcoal-200 dark:border-charcoal-800 text-charcoal-400">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Order Ref</th>
+                    <th className="py-3 px-4 font-semibold">Customer</th>
+                    <th className="py-3 px-4 font-semibold">City</th>
+                    <th className="py-3 px-4 font-semibold">Items</th>
+                    <th className="py-3 px-4 font-semibold">Total</th>
+                    <th className="py-3 px-4 font-semibold text-center">Status</th>
+                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-charcoal-100 dark:divide-charcoal-800">
+                  {filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-charcoal-50/50 dark:hover:bg-charcoal-800/40 transition-colors"
+                    >
+                      <td className="py-3 px-4 font-mono font-bold text-charcoal-900 dark:text-white">
+                        {order.orderNumber}
+                        <span className="block text-[10px] text-charcoal-400 font-sans font-normal">
+                          {formatDate(order.createdAt)}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-charcoal-900 dark:text-white">
+                          {order.customer.fullName}
+                        </div>
+                        <span className="text-[11px] text-charcoal-400 block">
+                          {order.customer.phone}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4 text-charcoal-600 dark:text-charcoal-300">
+                        {order.customer.city}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span className="font-semibold text-charcoal-800 dark:text-charcoal-200">
+                          {order.items.reduce((s, i) => s + i.quantity, 0)} items
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4 font-bold text-charcoal-900 dark:text-white">
+                        {formatPrice(order.total)}
+                      </td>
+
+                      <td className="py-3 px-4 text-center">
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold border-0 cursor-pointer ${getStatusBadge(
+                            order.status
+                          )}`}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </td>
+
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => handleWhatsAppCustomer(order)}
+                            className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950"
+                            title="Message customer on WhatsApp"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setActiveOrder(order)}
+                            className="p-1.5 rounded-lg text-charcoal-600 dark:text-charcoal-300 hover:text-brand-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+                            title="View order details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Orders Card View */}
+            <div className="md:hidden divide-y divide-charcoal-100 dark:divide-charcoal-800">
+              {filteredOrders.map((order) => (
+                <div key={order.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="font-mono font-bold text-xs text-charcoal-900 dark:text-white block">
+                        {order.orderNumber}
+                      </span>
+                      <span className="text-[10px] text-charcoal-400">
                         {formatDate(order.createdAt)}
                       </span>
-                    </td>
+                    </div>
 
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-charcoal-900 dark:text-white">
-                        {order.customer.fullName}
-                      </div>
-                      <span className="text-[11px] text-charcoal-400 block">
-                        {order.customer.phone}
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold border-0 cursor-pointer ${getStatusBadge(
+                        order.status
+                      )}`}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+
+                  <div className="text-xs space-y-0.5">
+                    <div className="font-semibold text-charcoal-900 dark:text-white">
+                      {order.customer.fullName}
+                    </div>
+                    <div className="text-[11px] text-charcoal-500">
+                      {order.customer.phone} • {order.customer.city}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-charcoal-100 dark:border-charcoal-800/60">
+                    <div>
+                      <span className="text-[10px] text-charcoal-400 block">Total</span>
+                      <span className="font-bold text-xs text-charcoal-900 dark:text-white font-serif">
+                        {formatPrice(order.total)}
                       </span>
-                    </td>
+                    </div>
 
-                    <td className="py-3 px-4 text-charcoal-600 dark:text-charcoal-300">
-                      {order.customer.city}
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <span className="font-semibold text-charcoal-800 dark:text-charcoal-200">
-                        {order.items.reduce((s, i) => s + i.quantity, 0)} items
-                      </span>
-                    </td>
-
-                    <td className="py-3 px-4 font-bold text-charcoal-900 dark:text-white">
-                      {formatPrice(order.total)}
-                    </td>
-
-                    <td className="py-3 px-4 text-center">
-                      <select
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold border-0 cursor-pointer ${getStatusBadge(
-                          order.status
-                        )}`}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleWhatsAppCustomer(order)}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-semibold flex items-center space-x-1"
                       >
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => handleWhatsAppCustomer(order)}
-                          className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950"
-                          title="Message customer on WhatsApp"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setActiveOrder(order)}
-                          className="p-1.5 rounded-lg text-charcoal-600 dark:text-charcoal-300 hover:text-brand-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
-                          title="View order details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveOrder(order)}
+                        className="p-1.5 rounded-lg text-charcoal-600 dark:text-charcoal-300 hover:bg-charcoal-100 dark:hover:bg-charcoal-800 border border-charcoal-200 dark:border-charcoal-700"
+                        title="View details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

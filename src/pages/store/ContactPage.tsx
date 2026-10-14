@@ -22,24 +22,24 @@ export const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 space-y-16">
-      <div className="text-center max-w-2xl mx-auto space-y-3">
-        <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-20 space-y-8 sm:space-y-16">
+      <div className="text-center max-w-2xl mx-auto space-y-2 sm:space-y-3">
+        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
           We are here to help
         </span>
-        <h1 className="font-serif text-3xl sm:text-5xl font-bold text-charcoal-900 dark:text-white">
+        <h1 className="font-serif text-2xl sm:text-5xl font-bold text-charcoal-900 dark:text-white">
           Contact Customer Care
         </h1>
-        <p className="text-sm text-charcoal-500">
+        <p className="text-xs sm:text-sm text-charcoal-500">
           Have an inquiry about an order, tracking, or bulk purchase? Reach out via WhatsApp or submit a message below.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10">
         {/* Contact Info Cards */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="p-6 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
-            <h3 className="font-serif text-xl font-bold text-charcoal-900 dark:text-white">
+          <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
+            <h3 className="font-serif text-lg sm:text-xl font-bold text-charcoal-900 dark:text-white">
               Get in Touch
             </h3>
 
@@ -64,7 +64,7 @@ export const ContactPage: React.FC = () => {
                   <strong className="block text-sm text-charcoal-900 dark:text-white">
                     Email Support
                   </strong>
-                  <span>murtuza.tech.savvy@gmail.com</span>
+                  <span className="break-all">murtuza.tech.savvy@gmail.com</span>
                 </div>
               </div>
 
@@ -105,7 +105,7 @@ export const ContactPage: React.FC = () => {
 
         {/* Contact Form */}
         <div className="lg:col-span-7">
-          <div className="p-8 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm">
+          <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm">
             {submitted ? (
               <div className="text-center py-12 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">

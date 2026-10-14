@@ -3,13 +3,13 @@ import { ShieldCheck } from 'lucide-react';
 
 export const PrivacyPolicyPage: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-20 space-y-6 sm:space-y-8">
       <div className="border-b border-charcoal-200 dark:border-charcoal-800 pb-6">
         <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-semibold uppercase mb-3">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>Legal & Trust</span>
         </div>
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
+        <h1 className="font-serif text-2xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
           Privacy Policy
         </h1>
         <p className="text-xs text-charcoal-500 mt-2">

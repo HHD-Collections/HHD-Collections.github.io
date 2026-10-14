@@ -60,19 +60,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </Link>
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 z-10 pointer-events-none">
           {discount > 0 && (
-            <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-brand-500 text-white shadow-sm tracking-wide">
+            <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[11px] font-bold rounded-full bg-brand-500 text-white shadow-sm tracking-wide">
               {discount}% OFF
             </span>
           )}
           {product.featured && (
-            <span className="px-2.5 py-1 text-[10px] font-semibold rounded-full bg-charcoal-900/90 text-brand-300 dark:bg-charcoal-800 backdrop-blur-sm tracking-wider uppercase">
+            <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[10px] font-semibold rounded-full bg-charcoal-900/90 text-brand-300 dark:bg-charcoal-800 backdrop-blur-sm tracking-wider uppercase">
               Featured
             </span>
           )}
           {!product.inStock && (
-            <span className="px-2.5 py-1 text-[10px] font-semibold rounded-full bg-red-600 text-white tracking-wider uppercase">
+            <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[10px] font-semibold rounded-full bg-red-600 text-white tracking-wider uppercase">
               Sold Out
             </span>
           )}
@@ -82,14 +82,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <button
           type="button"
           onClick={handleWishlistClick}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
+          className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full backdrop-blur-md transition-all duration-300 z-10 ${
             isFavorited
               ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400'
               : 'bg-white/80 dark:bg-charcoal-800/80 text-charcoal-600 dark:text-charcoal-300 hover:text-rose-500 hover:bg-white'
           }`}
           aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current text-rose-500' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFavorited ? 'fill-current text-rose-500' : ''}`} />
         </button>
 
         {/* Quick View / Hover Overlay Button */}
@@ -105,36 +105,35 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Product Details */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+      <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between text-xs text-charcoal-400 mb-1.5">
-            <span className="uppercase tracking-wider font-medium text-[11px] text-brand-600 dark:text-brand-400">
+          <div className="flex items-center justify-between text-xs text-charcoal-400 mb-1">
+            <span className="uppercase tracking-wider font-semibold text-[9px] sm:text-[11px] text-brand-600 dark:text-brand-400 truncate max-w-[65%]">
               {product.category}
             </span>
             {product.rating && (
-              <div className="flex items-center space-x-1 text-amber-500 font-semibold text-xs">
-                <Star className="w-3 h-3 fill-current" />
+              <div className="flex items-center space-x-0.5 sm:space-x-1 text-amber-500 font-semibold text-[10px] sm:text-xs flex-shrink-0">
+                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
                 <span>{product.rating.toFixed(1)}</span>
-                <span className="text-charcoal-400 font-normal">({product.reviewCount || 12})</span>
               </div>
             )}
           </div>
 
           <Link to={`/product/${product.slug}`} className="block group-hover:text-brand-600 transition-colors">
-            <h3 className="font-serif font-semibold text-sm sm:text-base text-charcoal-900 dark:text-white line-clamp-2 leading-snug">
+            <h3 className="font-serif font-semibold text-xs sm:text-base text-charcoal-900 dark:text-white line-clamp-2 leading-tight sm:leading-snug">
               {product.name}
             </h3>
           </Link>
         </div>
 
         {/* Price & Action */}
-        <div className="pt-3 mt-3 border-t border-charcoal-100 dark:border-charcoal-800/80 flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="font-bold text-base sm:text-lg text-charcoal-900 dark:text-white">
+        <div className="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-charcoal-100 dark:border-charcoal-800/80 flex items-center justify-between gap-1">
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-xs sm:text-base text-charcoal-900 dark:text-white truncate">
               {formatPrice(product.salePrice ?? product.regularPrice)}
             </span>
             {product.salePrice && (
-              <span className="text-xs text-charcoal-400 line-through">
+              <span className="text-[10px] sm:text-xs text-charcoal-400 line-through truncate">
                 {formatPrice(product.regularPrice)}
               </span>
             )}
@@ -144,7 +143,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             type="button"
             onClick={handleQuickAdd}
             disabled={!product.inStock}
-            className={`p-2.5 rounded-xl font-medium text-xs flex items-center space-x-1.5 transition-all ${
+            className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl font-medium text-xs flex items-center space-x-1.5 transition-all flex-shrink-0 ${
               !product.inStock
                 ? 'bg-charcoal-100 dark:bg-charcoal-800 text-charcoal-400 cursor-not-allowed'
                 : addedAnim
@@ -155,13 +154,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           >
             {addedAnim ? (
               <>
-                <Check className="w-4 h-4 text-white animate-scale" />
-                <span className="hidden sm:inline">Added</span>
+                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white animate-scale" />
+                <span className="hidden md:inline">Added</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline">Add</span>
+                <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden md:inline">Add</span>
               </>
             )}
           </button>

@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   ArrowRight,
   Printer,
+  ChevronDown,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { createOrder, buildWhatsAppOrderUrl } from '../../services/orderService';
@@ -42,6 +43,7 @@ export const CheckoutPage: React.FC = () => {
   const { cart, subtotal, clearCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
   const shippingFee = isFreeShipping ? 0 : STANDARD_SHIPPING_FEE;
@@ -213,9 +215,9 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-16 space-y-6 sm:space-y-10">
       <div>
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
+        <h1 className="font-serif text-2xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
           Secure Checkout
         </h1>
         <p className="text-xs sm:text-sm text-charcoal-500 mt-1">
@@ -223,11 +225,60 @@ export const CheckoutPage: React.FC = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      {/* Mobile Collapsible Order Summary Bar */}
+      <div className="lg:hidden rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 p-4 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
+          className="w-full flex items-center justify-between text-xs font-semibold text-charcoal-800 dark:text-charcoal-200"
+        >
+          <div className="flex items-center space-x-2">
+            <ShoppingBag className="w-4 h-4 text-brand-500" />
+            <span>{mobileSummaryOpen ? 'Hide Order Summary' : 'Show Order Summary'}</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${mobileSummaryOpen ? 'rotate-180' : ''}`} />
+          </div>
+          <span className="font-bold text-sm text-brand-600 dark:text-brand-400 font-serif">
+            {formatPrice(total)}
+          </span>
+        </button>
+
+        {mobileSummaryOpen && (
+          <div className="pt-4 mt-3 border-t border-charcoal-100 dark:border-charcoal-800 space-y-3 animate-fade-in">
+            {cart.map((item) => (
+              <div key={item.product.id} className="flex items-center justify-between text-xs">
+                <div className="flex items-center space-x-2.5">
+                  <img
+                    src={item.product.primaryImage}
+                    alt={item.product.name}
+                    className="w-10 h-10 rounded-lg object-cover bg-charcoal-50"
+                  />
+                  <div className="max-w-[170px]">
+                    <span className="font-semibold block truncate text-charcoal-900 dark:text-white">
+                      {item.product.name}
+                    </span>
+                    <span className="text-[10px] text-charcoal-400">Qty: {item.quantity}</span>
+                  </div>
+                </div>
+                <span className="font-bold text-charcoal-900 dark:text-white">
+                  {formatPrice((item.product.salePrice ?? item.product.regularPrice) * item.quantity)}
+                </span>
+              </div>
+            ))}
+            <div className="pt-2 border-t border-charcoal-100 dark:border-charcoal-800 text-xs space-y-1">
+              <div className="flex justify-between text-charcoal-500">
+                <span>Shipping:</span>
+                <span>{shippingFee === 0 ? 'FREE' : formatPrice(shippingFee)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
         {/* Left Form: Delivery Information */}
-        <div className="lg:col-span-7 space-y-8">
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-6">
-            <h3 className="font-serif text-xl font-bold text-charcoal-900 dark:text-white flex items-center">
+        <div className="lg:col-span-7 space-y-6 sm:space-y-8">
+          <div className="p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-4 sm:space-y-6">
+            <h3 className="font-serif text-lg sm:text-xl font-bold text-charcoal-900 dark:text-white flex items-center">
               <Truck className="w-5 h-5 mr-2 text-brand-500" />
               1. Delivery Information
             </h3>

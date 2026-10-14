@@ -75,17 +75,17 @@ export const AdminSettingsPage: React.FC = () => {
       )}
 
       {/* CLOUD FIRESTORE SEEDING TOOL */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-charcoal-900 border border-brand-500/30 shadow-luxury space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-2xl bg-brand-500/10 text-brand-500">
+      <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-brand-500/30 shadow-luxury space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center space-x-3">
+            <div className="p-2.5 rounded-2xl bg-brand-500/10 text-brand-500 flex-shrink-0">
               <Database className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+              <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal-900 dark:text-white">
                 One-Click Catalog Seeder (Cloud Firestore)
               </h3>
-              <p className="text-xs text-charcoal-500">
+              <p className="text-xs text-charcoal-500 mt-0.5">
                 Instantly populate your Firebase Firestore with all 14 official products and 4 categories.
               </p>
             </div>
@@ -94,7 +94,7 @@ export const AdminSettingsPage: React.FC = () => {
           <button
             onClick={handleSeedCatalog}
             disabled={seeding}
-            className="px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold flex items-center space-x-2 shadow-sm disabled:opacity-60 transition-all flex-shrink-0"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold flex items-center justify-center space-x-2 shadow-sm disabled:opacity-60 transition-all flex-shrink-0"
           >
             <CloudUpload className="w-4 h-4" />
             <span>{seeding ? 'Seeding Firestore...' : 'Seed Catalog to Firestore'}</span>

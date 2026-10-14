@@ -2,9 +2,9 @@ import React from 'react';
 
 export const TermsPage: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-20 space-y-6 sm:space-y-8">
       <div className="border-b border-charcoal-200 dark:border-charcoal-800 pb-6">
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
+        <h1 className="font-serif text-2xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
           Terms & Conditions
         </h1>
         <p className="text-xs text-charcoal-500 mt-2">

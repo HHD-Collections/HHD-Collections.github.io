@@ -286,7 +286,7 @@ export const ShopPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -310,44 +310,90 @@ export const ShopPage: React.FC = () => {
               </button>
             </div>
 
+            {/* Category */}
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-charcoal-400 uppercase">Category</h4>
+              <h4 className="text-xs font-semibold text-charcoal-400 uppercase tracking-wider">
+                Category
+              </h4>
               <button
-                onClick={() => {
-                  setSelectedCategory('all');
-                  setIsMobileFilterOpen(false);
-                }}
-                className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium ${
-                  selectedCategory === 'all' ? 'bg-brand-500 text-white' : 'text-charcoal-700 dark:text-charcoal-300'
+                onClick={() => setSelectedCategory('all')}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${
+                  selectedCategory === 'all'
+                    ? 'bg-brand-500 text-white font-semibold'
+                    : 'text-charcoal-700 dark:text-charcoal-300 hover:bg-charcoal-100 dark:hover:bg-charcoal-800'
                 }`}
               >
-                All Categories
+                <span>All Categories</span>
+                <span>({products.length})</span>
               </button>
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => {
-                    setSelectedCategory(c.slug);
-                    setIsMobileFilterOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium ${
-                    selectedCategory === c.slug ? 'bg-brand-500 text-white' : 'text-charcoal-700 dark:text-charcoal-300'
-                  }`}
-                >
-                  {c.name}
-                </button>
-              ))}
+              {categories.map((c) => {
+                const count = products.filter((p) => p.categorySlug === c.slug).length;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setSelectedCategory(c.slug)}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${
+                      selectedCategory === c.slug
+                        ? 'bg-brand-500 text-white font-semibold'
+                        : 'text-charcoal-700 dark:text-charcoal-300 hover:bg-charcoal-100 dark:hover:bg-charcoal-800'
+                    }`}
+                  >
+                    <span>{c.name}</span>
+                    <span>({count})</span>
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="pt-4 border-t border-charcoal-100 dark:border-charcoal-800">
+            {/* Price Range */}
+            <div className="space-y-3 pt-4 border-t border-charcoal-100 dark:border-charcoal-800">
+              <h4 className="text-xs font-semibold text-charcoal-400 uppercase tracking-wider">
+                Max Price: {formatPrice(priceRange.max)}
+              </h4>
+              <input
+                type="range"
+                min="500"
+                max="10000"
+                step="250"
+                value={priceRange.max}
+                onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) })}
+                className="w-full accent-brand-500"
+              />
+              <div className="flex justify-between text-[11px] text-charcoal-400">
+                <span>Rs. 500</span>
+                <span>Rs. 10,000</span>
+              </div>
+            </div>
+
+            {/* Stock Availability */}
+            <div className="space-y-3 pt-4 border-t border-charcoal-100 dark:border-charcoal-800">
+              <label className="flex items-center space-x-2.5 text-xs text-charcoal-700 dark:text-charcoal-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={inStockOnly}
+                  onChange={(e) => setInStockOnly(e.target.checked)}
+                  className="w-4 h-4 rounded text-brand-500 focus:ring-brand-500 border-charcoal-300"
+                />
+                <span className="font-medium">In Stock Only</span>
+              </label>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-4 border-t border-charcoal-100 dark:border-charcoal-800 flex flex-col gap-2">
+              <button
+                onClick={() => setIsMobileFilterOpen(false)}
+                className="w-full py-3 rounded-xl bg-brand-500 text-white text-xs font-semibold shadow-luxury"
+              >
+                Apply Filters ({filteredProducts.length} items)
+              </button>
               <button
                 onClick={() => {
                   resetFilters();
                   setIsMobileFilterOpen(false);
                 }}
-                className="w-full py-2.5 rounded-lg border border-charcoal-300 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200"
+                className="w-full py-2.5 rounded-xl border border-charcoal-300 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200"
               >
-                Clear All Filters
+                Reset Filters
               </button>
             </div>
           </div>

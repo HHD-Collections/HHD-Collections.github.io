@@ -28,46 +28,46 @@ export const Footer: React.FC = () => {
   return (
     <footer className="bg-charcoal-950 text-charcoal-300 border-t border-charcoal-800">
       {/* Trust Badges Banner */}
-      <div className="border-b border-charcoal-800/80 bg-charcoal-900/60 py-8">
+      <div className="border-b border-charcoal-800/80 bg-charcoal-900/60 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
-                <Truck className="w-6 h-6" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
+                <Truck className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">Nationwide Delivery</h4>
-                <p className="text-xs text-charcoal-400">Fast shipping across all cities in Pakistan</p>
+                <h4 className="text-xs sm:text-sm font-semibold text-white">Nationwide Delivery</h4>
+                <p className="text-[11px] sm:text-xs text-charcoal-400 mt-0.5">Fast shipping across Pakistan</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
-                <CreditCard className="w-6 h-6" />
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
+                <CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">Cash on Delivery</h4>
-                <p className="text-xs text-charcoal-400">Pay safely at your doorstep upon arrival</p>
+                <h4 className="text-xs sm:text-sm font-semibold text-white">Cash on Delivery</h4>
+                <p className="text-[11px] sm:text-xs text-charcoal-400 mt-0.5">Pay safely at your doorstep</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
-                <RotateCcw className="w-6 h-6" />
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
+                <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">Quality Guarantee</h4>
-                <p className="text-xs text-charcoal-400">Hassle-free 7-day checking replacement</p>
+                <h4 className="text-xs sm:text-sm font-semibold text-white">Quality Guarantee</h4>
+                <p className="text-[11px] sm:text-xs text-charcoal-400 mt-0.5">7-day checking replacement</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
-                <ShieldCheck className="w-6 h-6" />
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-400 flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">100% Genuine</h4>
-                <p className="text-xs text-charcoal-400">Curated, premium quality verified items</p>
+                <h4 className="text-xs sm:text-sm font-semibold text-white">100% Genuine</h4>
+                <p className="text-[11px] sm:text-xs text-charcoal-400 mt-0.5">Curated, verified products</p>
               </div>
             </div>
           </div>
@@ -214,7 +214,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-10 mt-10 border-t border-charcoal-800 flex flex-col sm:flex-row items-center justify-between text-xs text-charcoal-500">
+        <div className="pt-8 sm:pt-10 mt-8 sm:mt-10 border-t border-charcoal-800 flex flex-col sm:flex-row items-center justify-between text-xs text-charcoal-500 pb-16 md:pb-0">
           <p>© 2026 HHD Collections. All rights reserved.</p>
           <div className="flex items-center space-x-6 mt-4 sm:mt-0">
             <Link to="/privacy-policy" className="hover:text-charcoal-400 transition-colors">

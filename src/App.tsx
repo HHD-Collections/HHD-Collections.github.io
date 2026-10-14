@@ -9,6 +9,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { CartDrawer } from './components/layout/CartDrawer';
+import { MobileBottomBar } from './components/layout/MobileBottomBar';
 
 // Storefront Pages
 import { HomePage } from './pages/store/HomePage';
@@ -41,11 +42,12 @@ const StorefrontLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#FDFCF9] dark:bg-charcoal-950 text-charcoal-900 dark:text-charcoal-100 transition-colors duration-200">
       <Navbar />
-      <div className="flex-1">
+      <div className="flex-1 pb-16 md:pb-0">
         <Outlet />
       </div>
       <Footer />
       <CartDrawer />
+      <MobileBottomBar />
     </div>
   );
 };

@@ -31,13 +31,13 @@ export const SearchResultsPage: React.FC = () => {
   }, [query]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-16 space-y-6 sm:space-y-8">
       <div>
         <div className="flex items-center space-x-2 text-brand-600 dark:text-brand-400 text-xs font-semibold uppercase tracking-wider mb-2">
           <Search className="w-4 h-4" />
           <span>Search Results</span>
         </div>
-        <h1 className="font-serif text-3xl font-bold text-charcoal-900 dark:text-white">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal-900 dark:text-white">
           Results for "{query}"
         </h1>
         <p className="text-xs text-charcoal-500 mt-1">
@@ -46,13 +46,13 @@ export const SearchResultsPage: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-80 bg-charcoal-100 dark:bg-charcoal-800 rounded-2xl animate-pulse" />
+            <div key={i} className="h-64 sm:h-80 bg-charcoal-100 dark:bg-charcoal-800 rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20 bg-charcoal-50 dark:bg-charcoal-900 rounded-3xl p-8 max-w-xl mx-auto border border-charcoal-200 dark:border-charcoal-800">
+        <div className="text-center py-16 sm:py-20 bg-charcoal-50 dark:bg-charcoal-900 rounded-3xl p-6 sm:p-8 max-w-xl mx-auto border border-charcoal-200 dark:border-charcoal-800">
           <div className="w-16 h-16 rounded-full bg-charcoal-100 dark:bg-charcoal-800 flex items-center justify-center text-charcoal-400 mx-auto mb-4">
             <Search className="w-8 h-8" />
           </div>
@@ -72,7 +72,7 @@ export const SearchResultsPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

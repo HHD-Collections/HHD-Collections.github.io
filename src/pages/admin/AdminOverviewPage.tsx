@@ -84,20 +84,20 @@ export const AdminOverviewPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <button
             onClick={handleSeedDatabase}
             disabled={seeding}
-            className="px-4 py-2.5 rounded-xl bg-charcoal-800 hover:bg-charcoal-700 text-brand-300 text-xs font-semibold flex items-center space-x-2 border border-brand-500/30 transition-all"
+            className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 rounded-xl bg-charcoal-800 hover:bg-charcoal-700 text-brand-300 text-xs font-semibold flex items-center justify-center space-x-2 border border-brand-500/30 transition-all"
             title="Seed all 14 initial products to Cloud Firestore"
           >
             <CloudUpload className="w-4 h-4 text-brand-400" />
-            <span>{seeding ? 'Syncing...' : 'Sync Catalog to Firestore'}</span>
+            <span>{seeding ? 'Syncing...' : 'Sync to Firestore'}</span>
           </button>
 
           <Link
             to="/admin/products/new"
-            className="px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition-all"
+            className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Add Product</span>
@@ -113,10 +113,10 @@ export const AdminOverviewPage: React.FC = () => {
       )}
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-charcoal-500">Total Products</span>
+            <span className="text-[11px] sm:text-xs font-semibold text-charcoal-500">Total Products</span>
             <div className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
               <Package className="w-4 h-4" />
             </div>
@@ -124,14 +124,14 @@ export const AdminOverviewPage: React.FC = () => {
           <span className="text-2xl sm:text-3xl font-bold font-serif text-charcoal-900 dark:text-white block">
             {totalProducts}
           </span>
-          <span className="text-[11px] text-emerald-600 font-medium">
-            {activeProducts} Active in storefront
+          <span className="text-[10px] sm:text-[11px] text-emerald-600 font-medium">
+            {activeProducts} Active in store
           </span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-charcoal-500">Categories</span>
+            <span className="text-[11px] sm:text-xs font-semibold text-charcoal-500">Categories</span>
             <div className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
               <Layers className="w-4 h-4" />
             </div>
@@ -139,12 +139,12 @@ export const AdminOverviewPage: React.FC = () => {
           <span className="text-2xl sm:text-3xl font-bold font-serif text-charcoal-900 dark:text-white block">
             {totalCategories}
           </span>
-          <span className="text-[11px] text-charcoal-400">Organized departments</span>
+          <span className="text-[10px] sm:text-[11px] text-charcoal-400">Departments</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-charcoal-500">Orders Received</span>
+            <span className="text-[11px] sm:text-xs font-semibold text-charcoal-500">Orders</span>
             <div className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
               <ShoppingBag className="w-4 h-4" />
             </div>
@@ -152,12 +152,12 @@ export const AdminOverviewPage: React.FC = () => {
           <span className="text-2xl sm:text-3xl font-bold font-serif text-charcoal-900 dark:text-white block">
             {totalOrders}
           </span>
-          <span className="text-[11px] text-charcoal-400">Total customer orders</span>
+          <span className="text-[10px] sm:text-[11px] text-charcoal-400">Customer orders</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-charcoal-500">Out of Stock</span>
+            <span className="text-[11px] sm:text-xs font-semibold text-charcoal-500">Out of Stock</span>
             <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500">
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -165,29 +165,71 @@ export const AdminOverviewPage: React.FC = () => {
           <span className="text-2xl sm:text-3xl font-bold font-serif text-charcoal-900 dark:text-white block">
             {outOfStockProducts.length}
           </span>
-          <span className="text-[11px] text-rose-500 font-medium">
-            {lowStockProducts.length} items low in stock
+          <span className="text-[10px] sm:text-[11px] text-rose-500 font-medium">
+            {lowStockProducts.length} low in stock
           </span>
         </div>
       </div>
 
       {/* Tables Section: Recent Products & Low Stock Warnings */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Recent Products */}
-        <div className="lg:col-span-8 p-6 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-4">
+        <div className="lg:col-span-8 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+            <h3 className="font-serif text-base sm:text-lg font-bold text-charcoal-900 dark:text-white">
               Recently Added Products
             </h3>
             <Link
               to="/admin/products"
               className="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline"
             >
-              View All Products →
+              View All →
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Card View for Recent Products (md:hidden) */}
+          <div className="md:hidden space-y-2.5">
+            {products.slice(0, 5).map((prod) => (
+              <div
+                key={prod.id}
+                className="p-3 rounded-xl bg-charcoal-50 dark:bg-charcoal-800/60 border border-charcoal-100 dark:border-charcoal-800 flex items-center justify-between gap-3 text-xs"
+              >
+                <div className="flex items-center space-x-3 min-w-0">
+                  <img
+                    src={prod.primaryImage}
+                    alt={prod.name}
+                    className="w-10 h-10 rounded-lg object-cover bg-charcoal-100 flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = './assets/logo.png';
+                    }}
+                  />
+                  <div className="min-w-0">
+                    <span className="font-semibold text-charcoal-900 dark:text-white truncate block">
+                      {prod.name}
+                    </span>
+                    <div className="flex items-center space-x-2 mt-0.5">
+                      <span className="font-serif font-bold text-charcoal-800 dark:text-charcoal-200">
+                        {formatPrice(prod.salePrice ?? prod.regularPrice)}
+                      </span>
+                      <span className="text-[10px] text-charcoal-400">
+                        • {prod.category}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  to={`/admin/products/edit/${prod.id}`}
+                  className="px-2.5 py-1 rounded-lg bg-charcoal-200 dark:bg-charcoal-700 text-charcoal-800 dark:text-charcoal-200 text-xs font-semibold hover:bg-brand-500 hover:text-white transition-colors flex-shrink-0"
+                >
+                  Edit
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-charcoal-100 dark:border-charcoal-800 text-charcoal-400">

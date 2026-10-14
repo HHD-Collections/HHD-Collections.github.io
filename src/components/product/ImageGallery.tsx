@@ -84,10 +84,10 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
                 e.stopPropagation();
                 handlePrev();
               }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 dark:bg-charcoal-800/90 text-charcoal-800 dark:text-white shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white dark:hover:bg-charcoal-700 z-10"
+              className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/90 dark:bg-charcoal-800/90 text-charcoal-800 dark:text-white shadow-md flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-white dark:hover:bg-charcoal-700 z-10"
               aria-label="Previous image"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               type="button"
@@ -95,10 +95,10 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
                 e.stopPropagation();
                 handleNext();
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 dark:bg-charcoal-800/90 text-charcoal-800 dark:text-white shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white dark:hover:bg-charcoal-700 z-10"
+              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/90 dark:bg-charcoal-800/90 text-charcoal-800 dark:text-white shadow-md flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-white dark:hover:bg-charcoal-700 z-10"
               aria-label="Next image"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </>
         )}
@@ -106,7 +106,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
 
       {/* Multiple Thumbnail Gallery Selector */}
       {images.length > 1 && (
-        <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto pb-2 scrollbar-thin snap-x">
           {images.map((img, idx) => {
             const isSelected = idx === selectedIndex;
             return (
@@ -114,7 +114,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName 
                 key={img.id || idx}
                 type="button"
                 onClick={() => setSelectedIndex(idx)}
-                className={`relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
+                className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 snap-start border-2 transition-all ${
                   isSelected
                     ? 'border-brand-500 ring-2 ring-brand-500/30 scale-105'
                     : 'border-charcoal-200 dark:border-charcoal-700 opacity-70 hover:opacity-100'

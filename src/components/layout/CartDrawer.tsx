@@ -36,10 +36,10 @@ export const CartDrawer: React.FC = () => {
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-md bg-white dark:bg-charcoal-900 shadow-2xl flex flex-col border-l border-charcoal-200 dark:border-charcoal-800 animate-slide-up">
           {/* Header */}
-          <div className="p-5 border-b border-charcoal-100 dark:border-charcoal-800 flex items-center justify-between">
+          <div className="p-4 sm:p-5 border-b border-charcoal-100 dark:border-charcoal-800 flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <ShoppingBag className="w-5 h-5 text-brand-500" />
               <h2 className="text-lg font-serif font-bold text-charcoal-900 dark:text-white">
@@ -169,7 +169,7 @@ export const CartDrawer: React.FC = () => {
 
           {/* Footer / Checkout */}
           {cart.length > 0 && (
-            <div className="p-5 border-t border-charcoal-100 dark:border-charcoal-800 bg-white dark:bg-charcoal-900 space-y-3">
+            <div className="p-4 sm:p-5 border-t border-charcoal-100 dark:border-charcoal-800 bg-white dark:bg-charcoal-900 space-y-3 pb-safe">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-charcoal-600 dark:text-charcoal-400">Subtotal</span>
                 <span className="text-base font-bold text-charcoal-900 dark:text-white font-serif">

@@ -48,15 +48,15 @@ export const WishlistPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {wishlist.map((product) => {
           const unitPrice = product.salePrice ?? product.regularPrice;
           return (
             <div
               key={product.id}
-              className="p-4 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm flex flex-col justify-between space-y-4"
+              className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm flex flex-col justify-between space-y-3 sm:space-y-4"
             >
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-charcoal-50">
                   <img
                     src={product.primaryImage}
@@ -68,24 +68,24 @@ export const WishlistPage: React.FC = () => {
                   />
                   <button
                     onClick={() => removeFromWishlist(product.id)}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 dark:bg-charcoal-900/80 text-rose-500 hover:bg-white"
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 dark:bg-charcoal-900/90 text-rose-500 hover:bg-white shadow-sm"
                     title="Remove from wishlist"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-brand-600 dark:text-brand-400">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-brand-600 dark:text-brand-400">
                     {product.category}
                   </span>
                   <Link
                     to={`/product/${product.slug}`}
-                    className="block font-serif text-sm font-semibold text-charcoal-900 dark:text-white line-clamp-2 mt-0.5"
+                    className="block font-serif text-xs sm:text-sm font-semibold text-charcoal-900 dark:text-white line-clamp-2 mt-0.5 hover:text-brand-500 transition-colors"
                   >
                     {product.name}
                   </Link>
-                  <span className="text-sm font-bold text-charcoal-900 dark:text-white mt-1 block">
+                  <span className="text-xs sm:text-sm font-bold text-charcoal-900 dark:text-white mt-1 block font-serif">
                     {formatPrice(unitPrice)}
                   </span>
                 </div>
@@ -95,7 +95,7 @@ export const WishlistPage: React.FC = () => {
                 type="button"
                 onClick={() => handleMoveToCart(product)}
                 disabled={!product.inStock}
-                className="w-full py-2.5 px-3 rounded-xl bg-charcoal-900 hover:bg-black dark:bg-brand-500 dark:hover:bg-brand-600 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition-colors"
+                className="w-full py-2.5 px-2 sm:px-3 rounded-xl bg-charcoal-900 hover:bg-black dark:bg-brand-500 dark:hover:bg-brand-600 text-white font-semibold text-[11px] sm:text-xs flex items-center justify-center space-x-1.5 transition-colors disabled:opacity-50"
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
                 <span>Move to Bag</span>

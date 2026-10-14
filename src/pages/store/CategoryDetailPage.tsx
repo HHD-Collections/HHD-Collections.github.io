@@ -71,24 +71,24 @@ export const CategoryDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 space-y-6 sm:space-y-10">
       {/* Breadcrumbs */}
-      <nav className="flex items-center space-x-2 text-xs text-charcoal-500">
+      <nav className="flex items-center space-x-2 text-xs text-charcoal-500 overflow-x-auto whitespace-nowrap">
         <Link to="/" className="hover:text-brand-500">
           Home
         </Link>
-        <ChevronRight className="w-3.5 h-3.5" />
+        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
         <Link to="/categories" className="hover:text-brand-500">
           Categories
         </Link>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="font-semibold text-charcoal-900 dark:text-white">
+        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+        <span className="font-semibold text-charcoal-900 dark:text-white truncate">
           {category.name}
         </span>
       </nav>
 
       {/* Banner */}
-      <div className="relative rounded-3xl overflow-hidden bg-charcoal-900 text-white p-8 sm:p-12 border border-brand-500/20 shadow-xl">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-charcoal-900 text-white p-5 sm:p-12 border border-brand-500/20 shadow-xl">
         <img
           src={category.coverImage}
           alt={category.name}
@@ -98,33 +98,33 @@ export const CategoryDetailPage: React.FC = () => {
           }}
         />
         <div className="relative z-10 max-w-2xl">
-          <span className="text-xs font-bold text-brand-400 uppercase tracking-widest block mb-2">
+          <span className="text-[10px] sm:text-xs font-bold text-brand-400 uppercase tracking-widest block mb-1 sm:mb-2">
             Collection Showcase
           </span>
-          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
+          <h1 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-bold text-white">
             {category.name}
           </h1>
-          <p className="text-sm sm:text-base text-charcoal-300 mt-3 leading-relaxed">
+          <p className="text-xs sm:text-base text-charcoal-300 mt-2 sm:mt-3 leading-relaxed">
             {category.description}
           </p>
-          <div className="mt-4 text-xs font-medium text-brand-300">
+          <div className="mt-3 sm:mt-4 text-xs font-medium text-brand-300">
             {products.length} Products in this department
           </div>
         </div>
       </div>
 
       {/* Sorting bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-charcoal-200 dark:border-charcoal-800">
+      <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-charcoal-200 dark:border-charcoal-800">
         <span className="text-xs font-medium text-charcoal-500">
           Showing all {products.length} items
         </span>
 
         <div className="flex items-center space-x-2 text-xs">
-          <span className="text-charcoal-400">Sort by:</span>
+          <span className="text-charcoal-400 hidden sm:inline">Sort by:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-1.5 rounded-lg bg-white dark:bg-charcoal-800 border border-charcoal-200 dark:border-charcoal-700 text-charcoal-800 dark:text-charcoal-200 font-medium focus:outline-none"
+            className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-charcoal-800 border border-charcoal-200 dark:border-charcoal-700 text-charcoal-800 dark:text-charcoal-200 text-xs font-medium focus:outline-none"
           >
             <option value="newest">Newest</option>
             <option value="price-asc">Price: Low to High</option>
@@ -141,7 +141,7 @@ export const CategoryDetailPage: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {sortedProducts.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

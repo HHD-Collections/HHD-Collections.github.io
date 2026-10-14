@@ -196,94 +196,193 @@ export const AdminProductsPage: React.FC = () => {
             No products match your filters.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-charcoal-50 dark:bg-charcoal-800/60 border-b border-charcoal-200 dark:border-charcoal-800 text-charcoal-400">
-                <tr>
-                  <th className="py-3 px-4 font-semibold">Image & Product</th>
-                  <th className="py-3 px-4 font-semibold">Category</th>
-                  <th className="py-3 px-4 font-semibold">Price (PKR)</th>
-                  <th className="py-3 px-4 font-semibold">Stock</th>
-                  <th className="py-3 px-4 font-semibold text-center">Featured</th>
-                  <th className="py-3 px-4 font-semibold text-center">Status</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-charcoal-100 dark:divide-charcoal-800">
-                {filteredProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="hover:bg-charcoal-50/50 dark:hover:bg-charcoal-800/40 transition-colors"
-                  >
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={product.primaryImage}
-                          alt={product.name}
-                          className="w-12 h-12 rounded-lg object-cover bg-charcoal-100 flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = './assets/logo.png';
-                          }}
-                        />
-                        <div className="max-w-xs sm:max-w-sm">
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-charcoal-50 dark:bg-charcoal-800/60 border-b border-charcoal-200 dark:border-charcoal-800 text-charcoal-400">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Image & Product</th>
+                    <th className="py-3 px-4 font-semibold">Category</th>
+                    <th className="py-3 px-4 font-semibold">Price (PKR)</th>
+                    <th className="py-3 px-4 font-semibold">Stock</th>
+                    <th className="py-3 px-4 font-semibold text-center">Featured</th>
+                    <th className="py-3 px-4 font-semibold text-center">Status</th>
+                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-charcoal-100 dark:divide-charcoal-800">
+                  {filteredProducts.map((product) => (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-charcoal-50/50 dark:hover:bg-charcoal-800/40 transition-colors"
+                    >
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={product.primaryImage}
+                            alt={product.name}
+                            className="w-12 h-12 rounded-lg object-cover bg-charcoal-100 flex-shrink-0"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = './assets/logo.png';
+                            }}
+                          />
+                          <div className="max-w-xs sm:max-w-sm">
+                            <Link
+                              to={`/admin/products/edit/${product.id}`}
+                              className="font-bold text-charcoal-900 dark:text-white hover:text-brand-500 block truncate"
+                            >
+                              {product.name}
+                            </Link>
+                            <span className="text-[10px] text-charcoal-400 font-mono">
+                              SKU: {product.sku}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-4 text-charcoal-600 dark:text-charcoal-300">
+                        {product.category}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-charcoal-900 dark:text-white">
+                          {formatPrice(product.salePrice ?? product.regularPrice)}
+                        </div>
+                        {product.salePrice && (
+                          <div className="text-[10px] text-charcoal-400 line-through">
+                            {formatPrice(product.regularPrice)}
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            product.stock > 0
+                              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                              : 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
+                          }`}
+                        >
+                          {product.stock} units
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleToggleFeatured(product)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            product.featured
+                              ? 'text-amber-500 hover:text-amber-600'
+                              : 'text-charcoal-300 hover:text-amber-400'
+                          }`}
+                          title={product.featured ? 'Featured on homepage' : 'Not featured'}
+                        >
+                          <Star className={`w-4 h-4 ${product.featured ? 'fill-current' : ''}`} />
+                        </button>
+                      </td>
+
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleToggleActive(product)}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${
+                            product.active
+                              ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
+                              : 'bg-charcoal-200 dark:bg-charcoal-800 text-charcoal-500'
+                          }`}
+                        >
+                          {product.active ? 'Published' : 'Draft'}
+                        </button>
+                      </td>
+
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end space-x-1.5">
+                          <Link
+                            to={`/product/${product.slug}`}
+                            target="_blank"
+                            className="p-1.5 rounded-lg text-charcoal-400 hover:text-brand-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+                            title="View on storefront"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Link>
+
+                          <button
+                            onClick={() => handleDuplicate(product.id)}
+                            className="p-1.5 rounded-lg text-charcoal-400 hover:text-charcoal-700 dark:hover:text-white hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+                            title="Duplicate product"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+
                           <Link
                             to={`/admin/products/edit/${product.id}`}
-                            className="font-bold text-charcoal-900 dark:text-white hover:text-brand-500 block truncate"
+                            className="p-1.5 rounded-lg text-charcoal-400 hover:text-brand-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+                            title="Edit product"
                           >
-                            {product.name}
+                            <Edit className="w-4 h-4" />
                           </Link>
-                          <span className="text-[10px] text-charcoal-400 font-mono">
-                            SKU: {product.sku}
-                          </span>
+
+                          <button
+                            onClick={() => setDeleteConfirmId(product.id)}
+                            className="p-1.5 rounded-lg text-charcoal-400 hover:text-rose-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+                            title="Delete product"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
-                      </div>
-                    </td>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                    <td className="py-3 px-4 text-charcoal-600 dark:text-charcoal-300">
-                      {product.category}
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-charcoal-900 dark:text-white">
-                        {formatPrice(product.salePrice ?? product.regularPrice)}
-                      </div>
-                      {product.salePrice && (
-                        <div className="text-[10px] text-charcoal-400 line-through">
-                          {formatPrice(product.regularPrice)}
-                        </div>
-                      )}
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          product.stock > 0
-                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
-                            : 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
-                        }`}
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-charcoal-100 dark:divide-charcoal-800">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="p-3.5 space-y-2.5">
+                  <div className="flex items-start space-x-3">
+                    <img
+                      src={product.primaryImage}
+                      alt={product.name}
+                      className="w-14 h-14 rounded-xl object-cover bg-charcoal-100 flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = './assets/logo.png';
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        to={`/admin/products/edit/${product.id}`}
+                        className="font-bold text-xs text-charcoal-900 dark:text-white hover:text-brand-500 block truncate"
                       >
-                        {product.stock} units
+                        {product.name}
+                      </Link>
+                      <span className="text-[10px] text-charcoal-400 font-mono block">
+                        SKU: {product.sku} • {product.category}
                       </span>
-                    </td>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="font-bold text-xs text-charcoal-900 dark:text-white">
+                          {formatPrice(product.salePrice ?? product.regularPrice)}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            product.stock > 0
+                              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                              : 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
+                          }`}
+                        >
+                          {product.stock} in stock
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-                    <td className="py-3 px-4 text-center">
-                      <button
-                        onClick={() => handleToggleFeatured(product)}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          product.featured
-                            ? 'text-amber-500 hover:text-amber-600'
-                            : 'text-charcoal-300 hover:text-amber-400'
-                        }`}
-                        title={product.featured ? 'Featured on homepage' : 'Not featured'}
-                      >
-                        <Star className={`w-4 h-4 ${product.featured ? 'fill-current' : ''}`} />
-                      </button>
-                    </td>
-
-                    <td className="py-3 px-4 text-center">
+                  {/* Actions & Toggles */}
+                  <div className="flex items-center justify-between pt-2 border-t border-charcoal-100 dark:border-charcoal-800/60 text-xs">
+                    <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleToggleActive(product)}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                           product.active
                             ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
                             : 'bg-charcoal-200 dark:bg-charcoal-800 text-charcoal-500'
@@ -291,49 +390,54 @@ export const AdminProductsPage: React.FC = () => {
                       >
                         {product.active ? 'Published' : 'Draft'}
                       </button>
-                    </td>
 
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end space-x-1.5">
-                        <Link
-                          to={`/product/${product.slug}`}
-                          target="_blank"
-                          className="p-1.5 rounded-lg text-charcoal-400 hover:text-brand-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
-                          title="View on storefront"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Link>
+                      <button
+                        onClick={() => handleToggleFeatured(product)}
+                        className={`p-1 rounded-lg ${
+                          product.featured ? 'text-amber-500' : 'text-charcoal-300'
+                        }`}
+                        title="Toggle Featured"
+                      >
+                        <Star className={`w-4 h-4 ${product.featured ? 'fill-current' : ''}`} />
+                      </button>
+                    </div>
 
-                        <button
-                          onClick={() => handleDuplicate(product.id)}
-                          className="p-1.5 rounded-lg text-charcoal-400 hover:text-charcoal-700 dark:hover:text-white hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
-                          title="Duplicate product"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-
-                        <Link
-                          to={`/admin/products/edit/${product.id}`}
-                          className="p-1.5 rounded-lg text-charcoal-400 hover:text-brand-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
-                          title="Edit product"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Link>
-
-                        <button
-                          onClick={() => setDeleteConfirmId(product.id)}
-                          className="p-1.5 rounded-lg text-charcoal-400 hover:text-rose-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
-                          title="Delete product"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    <div className="flex items-center space-x-1.5">
+                      <Link
+                        to={`/product/${product.slug}`}
+                        target="_blank"
+                        className="p-1.5 rounded-lg text-charcoal-400 hover:text-brand-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+                        title="View"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDuplicate(product.id)}
+                        className="p-1.5 rounded-lg text-charcoal-400 hover:text-charcoal-700 dark:hover:text-white"
+                        title="Duplicate"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                      <Link
+                        to={`/admin/products/edit/${product.id}`}
+                        className="p-1.5 rounded-lg text-charcoal-400 hover:text-brand-500"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => setDeleteConfirmId(product.id)}
+                        className="p-1.5 rounded-lg text-charcoal-400 hover:text-rose-500"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

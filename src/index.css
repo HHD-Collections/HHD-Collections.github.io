@@ -5,6 +5,12 @@
 @layer base {
   html {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overscroll-behavior-y: none;
   }
 
   h1, h2, h3, .font-serif {
@@ -12,10 +18,19 @@
   }
 }
 
+/* Safe area support for iOS / mobile home indicators */
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+}
+
+.bottom-safe {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Custom luxury scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -39,3 +54,11 @@
 .image-zoom-container img {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Prevent unwanted pull-to-refresh on mobile app feel */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS inputs */
+  }
+}
+

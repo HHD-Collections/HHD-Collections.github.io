@@ -129,7 +129,7 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 space-y-10 sm:space-y-16 pb-20 md:pb-0">
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center space-x-2 text-xs text-charcoal-500 overflow-x-auto whitespace-nowrap">
         <Link to="/" className="hover:text-brand-500">
@@ -352,11 +352,11 @@ export const ProductDetailPage: React.FC = () => {
       </div>
 
       {/* Tabbed Detailed Specifications */}
-      <div className="border-t border-charcoal-200 dark:border-charcoal-800 pt-10">
-        <div className="flex border-b border-charcoal-200 dark:border-charcoal-800 space-x-8">
+      <div className="border-t border-charcoal-200 dark:border-charcoal-800 pt-8 sm:pt-10">
+        <div className="flex border-b border-charcoal-200 dark:border-charcoal-800 space-x-3 sm:space-x-8 overflow-x-auto scrollbar-none whitespace-nowrap">
           <button
             onClick={() => setActiveTab('desc')}
-            className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${
+            className={`pb-3 text-xs sm:text-sm font-semibold transition-colors border-b-2 flex-shrink-0 ${
               activeTab === 'desc'
                 ? 'border-brand-500 text-brand-600 dark:text-brand-400'
                 : 'border-transparent text-charcoal-500 hover:text-charcoal-800 dark:hover:text-white'
@@ -366,7 +366,7 @@ export const ProductDetailPage: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('specs')}
-            className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${
+            className={`pb-3 text-xs sm:text-sm font-semibold transition-colors border-b-2 flex-shrink-0 ${
               activeTab === 'specs'
                 ? 'border-brand-500 text-brand-600 dark:text-brand-400'
                 : 'border-transparent text-charcoal-500 hover:text-charcoal-800 dark:hover:text-white'
@@ -376,7 +376,7 @@ export const ProductDetailPage: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('shipping')}
-            className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${
+            className={`pb-3 text-xs sm:text-sm font-semibold transition-colors border-b-2 flex-shrink-0 ${
               activeTab === 'shipping'
                 ? 'border-brand-500 text-brand-600 dark:text-brand-400'
                 : 'border-transparent text-charcoal-500 hover:text-charcoal-800 dark:hover:text-white'
@@ -467,6 +467,53 @@ export const ProductDetailPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Sticky Mobile Bottom Bar */}
+      <div className="fixed bottom-16 inset-x-0 z-30 md:hidden bg-white/95 dark:bg-charcoal-900/95 backdrop-blur-md border-t border-charcoal-200/80 dark:border-charcoal-800 px-4 py-2.5 flex items-center justify-between gap-3 shadow-luxury">
+        <div className="flex flex-col min-w-0">
+          <span className="text-[10px] text-charcoal-400 uppercase font-semibold">Total Price</span>
+          <span className="font-bold text-sm text-charcoal-900 dark:text-white truncate">
+            {formatPrice(unitPrice * quantity)}
+          </span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={handleWhatsAppOrder}
+            className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+            title="Order via WhatsApp"
+            aria-label="Order on WhatsApp"
+          >
+            <MessageCircle className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={!product.inStock}
+            className={`py-2.5 px-4 rounded-xl font-semibold text-xs flex items-center space-x-1.5 transition-all shadow-sm ${
+              !product.inStock
+                ? 'bg-charcoal-200 dark:bg-charcoal-800 text-charcoal-400 cursor-not-allowed'
+                : addedSuccess
+                ? 'bg-emerald-600 text-white'
+                : 'bg-brand-500 hover:bg-brand-600 text-white'
+            }`}
+          >
+            {addedSuccess ? (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                <span>Added!</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Add to Bag</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

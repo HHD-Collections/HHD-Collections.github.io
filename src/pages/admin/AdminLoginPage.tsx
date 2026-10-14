@@ -83,7 +83,7 @@ export const AdminLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-charcoal-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-charcoal-950 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -98,7 +98,7 @@ export const AdminLoginPage: React.FC = () => {
             }}
           />
         </Link>
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-white">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-white">
           Admin Authentication
         </h1>
         <p className="text-xs text-charcoal-400">
@@ -106,8 +106,8 @@ export const AdminLoginPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="bg-charcoal-900 border border-charcoal-800 py-8 px-6 sm:px-10 shadow-2xl rounded-3xl space-y-6">
+      <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="bg-charcoal-900 border border-charcoal-800 py-6 px-5 sm:py-8 sm:px-10 shadow-2xl rounded-2xl sm:rounded-3xl space-y-6">
           {/* Configuration Setup Notice */}
           {isConfigNotFound && (
             <div className="p-4 rounded-2xl bg-amber-950/60 border border-amber-700/80 text-amber-200 text-xs space-y-3">

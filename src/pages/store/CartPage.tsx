@@ -66,9 +66,9 @@ export const CartPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-16 space-y-6 sm:space-y-10">
       <div>
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
+        <h1 className="font-serif text-2xl sm:text-4xl font-bold text-charcoal-900 dark:text-white">
           Shopping Cart
         </h1>
         <p className="text-xs sm:text-sm text-charcoal-500 mt-1">
@@ -86,7 +86,7 @@ export const CartPage: React.FC = () => {
             <span className="col-span-2 text-right">Total</span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {cart.map((item) => {
               const unitPrice = item.product.salePrice ?? item.product.regularPrice;
               const itemTotal = unitPrice * item.quantity;
@@ -94,70 +94,134 @@ export const CartPage: React.FC = () => {
               return (
                 <div
                   key={`${item.product.id}-${item.selectedVariant || 'default'}`}
-                  className="p-4 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 flex flex-col sm:grid sm:grid-cols-12 items-center gap-4 shadow-sm"
+                  className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm"
                 >
-                  {/* Product Info */}
-                  <div className="sm:col-span-6 flex items-center space-x-4 w-full">
-                    <img
-                      src={item.product.primaryImage}
-                      alt={item.product.name}
-                      className="w-20 h-20 rounded-xl object-cover bg-charcoal-50 flex-shrink-0"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = './assets/logo.png';
-                      }}
-                    />
-                    <div className="space-y-1">
-                      <Link
-                        to={`/product/${item.product.slug}`}
-                        className="text-sm font-semibold text-charcoal-900 dark:text-white hover:text-brand-500 transition-colors line-clamp-2"
-                      >
-                        {item.product.name}
-                      </Link>
-                      <span className="text-[11px] text-charcoal-400 block">
-                        Category: {item.product.category}
-                      </span>
+                  {/* Mobile App Layout (sm:hidden) */}
+                  <div className="sm:hidden space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <img
+                        src={item.product.primaryImage}
+                        alt={item.product.name}
+                        className="w-16 h-16 rounded-xl object-cover bg-charcoal-50 flex-shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = './assets/logo.png';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0 pr-1">
+                        <Link
+                          to={`/product/${item.product.slug}`}
+                          className="text-xs font-semibold text-charcoal-900 dark:text-white hover:text-brand-500 transition-colors line-clamp-2"
+                        >
+                          {item.product.name}
+                        </Link>
+                        <span className="text-[10px] text-charcoal-400 block mt-0.5">
+                          {item.product.category}
+                        </span>
+                        <div className="text-xs font-serif font-bold text-charcoal-900 dark:text-white mt-1">
+                          {formatPrice(unitPrice)}
+                        </div>
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.product.id)}
-                        className="text-xs text-rose-500 hover:text-rose-600 flex items-center space-x-1 pt-1"
+                        className="p-1.5 text-charcoal-400 hover:text-rose-500 transition-colors"
+                        title="Remove item"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Remove</span>
+                        <Trash2 className="w-4 h-4" />
                       </button>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2.5 border-t border-charcoal-100 dark:border-charcoal-800/80">
+                      <div className="flex items-center border border-charcoal-300 dark:border-charcoal-700 rounded-lg overflow-hidden bg-charcoal-50 dark:bg-charcoal-800">
+                        <button
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          className="p-1.5 hover:bg-charcoal-200 dark:hover:bg-charcoal-700 text-charcoal-600 dark:text-charcoal-300"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="px-3 text-xs font-bold text-charcoal-900 dark:text-white">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          className="p-1.5 hover:bg-charcoal-200 dark:hover:bg-charcoal-700 text-charcoal-600 dark:text-charcoal-300"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-[10px] text-charcoal-400 uppercase tracking-wider block">Subtotal</span>
+                        <span className="font-serif font-bold text-sm text-charcoal-900 dark:text-white">
+                          {formatPrice(itemTotal)}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Price */}
-                  <div className="sm:col-span-2 text-center text-sm font-semibold text-charcoal-800 dark:text-charcoal-200 w-full flex sm:block justify-between">
-                    <span className="sm:hidden text-xs text-charcoal-400">Unit Price:</span>
-                    <span>{formatPrice(unitPrice)}</span>
-                  </div>
-
-                  {/* Quantity Controls */}
-                  <div className="sm:col-span-2 flex justify-center w-full sm:w-auto">
-                    <div className="flex items-center border border-charcoal-300 dark:border-charcoal-700 rounded-lg overflow-hidden bg-white dark:bg-charcoal-800">
-                      <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                        className="p-1.5 hover:bg-charcoal-100 dark:hover:bg-charcoal-700 text-charcoal-600 dark:text-charcoal-300"
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="px-3 text-xs font-bold text-charcoal-900 dark:text-white">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        className="p-1.5 hover:bg-charcoal-100 dark:hover:bg-charcoal-700 text-charcoal-600 dark:text-charcoal-300"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
+                  {/* Desktop Grid Layout (hidden sm:grid) */}
+                  <div className="hidden sm:grid sm:grid-cols-12 items-center gap-4">
+                    {/* Product Info */}
+                    <div className="sm:col-span-6 flex items-center space-x-4 w-full">
+                      <img
+                        src={item.product.primaryImage}
+                        alt={item.product.name}
+                        className="w-20 h-20 rounded-xl object-cover bg-charcoal-50 flex-shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = './assets/logo.png';
+                        }}
+                      />
+                      <div className="space-y-1">
+                        <Link
+                          to={`/product/${item.product.slug}`}
+                          className="text-sm font-semibold text-charcoal-900 dark:text-white hover:text-brand-500 transition-colors line-clamp-2"
+                        >
+                          {item.product.name}
+                        </Link>
+                        <span className="text-[11px] text-charcoal-400 block">
+                          Category: {item.product.category}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeFromCart(item.product.id)}
+                          className="text-xs text-rose-500 hover:text-rose-600 flex items-center space-x-1 pt-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Remove</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Total */}
-                  <div className="sm:col-span-2 text-right font-serif font-bold text-base text-charcoal-900 dark:text-white w-full flex sm:block justify-between">
-                    <span className="sm:hidden text-xs text-charcoal-400 font-sans font-normal">Subtotal:</span>
-                    <span>{formatPrice(itemTotal)}</span>
+                    {/* Price */}
+                    <div className="sm:col-span-2 text-center text-sm font-semibold text-charcoal-800 dark:text-charcoal-200">
+                      <span>{formatPrice(unitPrice)}</span>
+                    </div>
+
+                    {/* Quantity Controls */}
+                    <div className="sm:col-span-2 flex justify-center">
+                      <div className="flex items-center border border-charcoal-300 dark:border-charcoal-700 rounded-lg overflow-hidden bg-white dark:bg-charcoal-800">
+                        <button
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          className="p-1.5 hover:bg-charcoal-100 dark:hover:bg-charcoal-700 text-charcoal-600 dark:text-charcoal-300"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="px-3 text-xs font-bold text-charcoal-900 dark:text-white">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          className="p-1.5 hover:bg-charcoal-100 dark:hover:bg-charcoal-700 text-charcoal-600 dark:text-charcoal-300"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Total */}
+                    <div className="sm:col-span-2 text-right font-serif font-bold text-base text-charcoal-900 dark:text-white">
+                      <span>{formatPrice(itemTotal)}</span>
+                    </div>
                   </div>
                 </div>
               );

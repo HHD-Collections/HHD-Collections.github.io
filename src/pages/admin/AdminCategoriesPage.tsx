@@ -189,14 +189,14 @@ export const AdminCategoriesPage: React.FC = () => {
       )}
 
       {/* Categories Grid Table */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {categories.map((cat) => {
           const productCount = products.filter((p) => p.categorySlug === cat.slug).length;
 
           return (
             <div
               key={cat.id}
-              className="p-4 rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm flex flex-col justify-between space-y-4"
+              className="p-4 rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 shadow-sm flex flex-col justify-between space-y-4"
             >
               <div className="space-y-3">
                 <div className="relative aspect-video rounded-2xl overflow-hidden bg-charcoal-100">
@@ -266,8 +266,8 @@ export const AdminCategoriesPage: React.FC = () => {
 
       {/* Modal Dialog */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 p-6 space-y-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-lg rounded-2xl sm:rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 p-5 sm:p-6 space-y-5 sm:space-y-6 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-charcoal-100 dark:border-charcoal-800">
               <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
                 {editingCategory ? 'Edit Category' : 'Create New Category'}

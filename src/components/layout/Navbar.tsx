@@ -64,12 +64,13 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 w-full transition-all duration-300">
       {/* Top Announcement Bar */}
-      <div className="bg-charcoal-900 text-ivory-100 dark:bg-black dark:text-brand-300 text-xs py-2 px-4 border-b border-brand-500/20">
+      <div className="bg-charcoal-900 text-ivory-100 dark:bg-black dark:text-brand-300 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-brand-500/20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
-            <span className="font-medium tracking-wide">
-              Free Delivery Across Pakistan on Orders Over Rs. 3,000 | Cash on Delivery Available
+          <div className="flex items-center space-x-2 truncate mx-auto sm:mx-0">
+            <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-brand-400 animate-pulse flex-shrink-0"></span>
+            <span className="font-medium tracking-wide truncate">
+              <span className="sm:hidden">Free Nationwide Delivery on Orders Over Rs. 3,000 | COD</span>
+              <span className="hidden sm:inline">Free Delivery Across Pakistan on Orders Over Rs. 3,000 | Cash on Delivery Available</span>
             </span>
           </div>
           <div className="hidden md:flex items-center space-x-6 text-xs text-charcoal-300">
@@ -92,14 +93,14 @@ export const Navbar: React.FC = () => {
             : 'bg-white dark:bg-charcoal-900 border-charcoal-100 dark:border-charcoal-800'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Mobile Menu Button */}
             <div className="flex items-center lg:hidden">
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg text-charcoal-700 dark:text-charcoal-200 hover:text-brand-600 focus:outline-none"
+                className="p-2 -ml-2 rounded-xl text-charcoal-700 dark:text-charcoal-200 hover:text-brand-600 hover:bg-charcoal-100 dark:hover:bg-charcoal-800 focus:outline-none"
                 aria-label="Toggle menu"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -108,21 +109,20 @@ export const Navbar: React.FC = () => {
 
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="flex items-center space-x-3 group">
+              <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group">
                 <img
                   src="./assets/logo.png"
                   alt="HHD Collections Logo"
-                  className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  className="h-9 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
-                    // Fallback to text if image fails
                     (e.target as HTMLElement).style.display = 'none';
                   }}
                 />
                 <div className="flex flex-col">
-                  <span className="font-serif text-2xl font-bold tracking-tight text-charcoal-900 dark:text-white flex items-center">
-                    HHD<span className="text-brand-500 font-light ml-1.5">Collections</span>
+                  <span className="font-serif text-lg sm:text-2xl font-bold tracking-tight text-charcoal-900 dark:text-white flex items-center">
+                    HHD<span className="text-brand-500 font-light ml-1 sm:ml-1.5">Collections</span>
                   </span>
-                  <span className="text-[10px] uppercase tracking-widest text-charcoal-500 dark:text-charcoal-400 font-sans -mt-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-charcoal-500 dark:text-charcoal-400 font-sans -mt-0.5 sm:-mt-1">
                     Luxury Essentials
                   </span>
                 </div>
@@ -201,9 +201,9 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Right Action Icons */}
-            <div className="flex items-center space-x-3 sm:space-x-5">
-              {/* Search Toggle */}
-              <div className="relative">
+            <div className="flex items-center space-x-1 sm:space-x-4">
+              {/* Desktop Inline Search */}
+              <div className="hidden sm:block relative">
                 {isSearchOpen ? (
                   <form onSubmit={handleSearchSubmit} className="flex items-center">
                     <input
@@ -235,6 +235,16 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
 
+              {/* Mobile Search Button (Toggles full width search bar) */}
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className="sm:hidden p-2 rounded-full text-charcoal-600 dark:text-charcoal-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-charcoal-100 dark:hover:bg-charcoal-800 transition-colors"
+                aria-label="Search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
               {/* Theme Toggle */}
               <button
                 type="button"
@@ -245,10 +255,10 @@ export const Navbar: React.FC = () => {
                 {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              {/* Wishlist Link */}
+              {/* Wishlist Link (Desktop) */}
               <Link
                 to="/wishlist"
-                className="relative p-2 rounded-full text-charcoal-600 dark:text-charcoal-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-charcoal-100 dark:hover:bg-charcoal-800 transition-colors"
+                className="hidden sm:flex relative p-2 rounded-full text-charcoal-600 dark:text-charcoal-300 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-charcoal-100 dark:hover:bg-charcoal-800 transition-colors"
                 aria-label="Wishlist"
               >
                 <Heart className="w-5 h-5" />
@@ -277,67 +287,127 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-charcoal-100 dark:border-charcoal-800 bg-white dark:bg-charcoal-900 px-4 pt-3 pb-6 space-y-3 animate-fade-in">
-            {/* Mobile Search */}
-            <form onSubmit={handleSearchSubmit} className="relative mb-3">
+        {/* Mobile Full-Width Search Bar Dropdown */}
+        {isSearchOpen && (
+          <div className="sm:hidden border-t border-charcoal-100 dark:border-charcoal-800 bg-white/95 dark:bg-charcoal-900/95 p-3 animate-fade-in shadow-md">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search luxury products, appliances, organizers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm rounded-lg bg-charcoal-100 dark:bg-charcoal-800 text-charcoal-900 dark:text-white border border-charcoal-200 dark:border-charcoal-700 focus:outline-none"
+                autoFocus
+                className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl bg-charcoal-100 dark:bg-charcoal-800 text-charcoal-900 dark:text-white border border-brand-500/40 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
               />
-              <Search className="w-4 h-4 text-charcoal-400 absolute left-3 top-3" />
+              <Search className="w-4 h-4 text-charcoal-400 absolute left-3.5" />
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(false)}
+                className="absolute right-3 p-1 text-charcoal-400 hover:text-charcoal-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </form>
+          </div>
+        )}
 
-            <div className="space-y-1">
-              <Link
-                to="/"
-                className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-800 dark:text-charcoal-200 hover:bg-brand-50 dark:hover:bg-charcoal-800"
-              >
-                Home
-              </Link>
-              <Link
-                to="/shop"
-                className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-800 dark:text-charcoal-200 hover:bg-brand-50 dark:hover:bg-charcoal-800"
-              >
-                Shop All Products
-              </Link>
-              <div className="pl-3 py-1 space-y-1 border-l-2 border-brand-500/40 my-1">
-                <span className="text-xs uppercase font-semibold text-charcoal-400 tracking-wider">
-                  Categories
-                </span>
-                {INITIAL_CATEGORIES.map((cat) => (
-                  <Link
-                    key={cat.id}
-                    to={`/category/${cat.slug}`}
-                    className="block py-1.5 text-sm text-charcoal-600 dark:text-charcoal-300 hover:text-brand-500"
+        {/* Mobile Navigation Drawer with Overlay */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Drawer */}
+            <div className="relative w-4/5 max-w-sm h-full bg-white dark:bg-charcoal-900 shadow-2xl flex flex-col justify-between p-6 overflow-y-auto animate-slide-right">
+              <div className="space-y-6">
+                {/* Header & Logo */}
+                <div className="flex items-center justify-between pb-4 border-b border-charcoal-100 dark:border-charcoal-800">
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src="./assets/logo.png"
+                      alt="HHD"
+                      className="h-8 w-auto object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                    <span className="font-serif font-bold text-lg text-charcoal-900 dark:text-white">
+                      HHD Collections
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-1.5 rounded-lg text-charcoal-500 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
                   >
-                    {cat.name}
-                  </Link>
-                ))}
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Primary Nav Links */}
+                <div className="space-y-1">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      to={link.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        location.pathname === link.path
+                          ? 'bg-brand-500 text-white'
+                          : 'text-charcoal-800 dark:text-charcoal-200 hover:bg-charcoal-100 dark:hover:bg-charcoal-800'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Category List */}
+                <div className="space-y-2 pt-2 border-t border-charcoal-100 dark:border-charcoal-800">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 block px-3">
+                    Curated Categories
+                  </span>
+                  <div className="space-y-0.5">
+                    {INITIAL_CATEGORIES.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        to={`/category/${cat.slug}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-3 py-2 text-xs font-medium text-charcoal-600 dark:text-charcoal-300 hover:text-brand-500 rounded-lg hover:bg-charcoal-50 dark:hover:bg-charcoal-800/50"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <Link
-                to="/about"
-                className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-800 dark:text-charcoal-200 hover:bg-brand-50 dark:hover:bg-charcoal-800"
-              >
-                About Us
-              </Link>
-              <Link
-                to="/contact"
-                className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-800 dark:text-charcoal-200 hover:bg-brand-50 dark:hover:bg-charcoal-800"
-              >
-                Contact & Support
-              </Link>
-              <Link
-                to="/admin"
-                className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-charcoal-800"
-              >
-                <ShieldCheck className="w-5 h-5" />
-                <span>Admin Dashboard</span>
-              </Link>
+
+              {/* Drawer Footer Actions */}
+              <div className="pt-6 border-t border-charcoal-100 dark:border-charcoal-800 space-y-3">
+                <a
+                  href="https://wa.me/923001234567"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center justify-center space-x-2"
+                >
+                  <span>Chat on WhatsApp (+92 300 1234567)</span>
+                </a>
+
+                <Link
+                  to="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full py-2 px-3 rounded-xl bg-charcoal-100 dark:bg-charcoal-800 text-charcoal-700 dark:text-charcoal-300 hover:text-brand-500 text-xs font-semibold flex items-center justify-center space-x-1.5"
+                >
+                  <ShieldCheck className="w-4 h-4 text-brand-500" />
+                  <span>Admin Portal</span>
+                </Link>
+
+                <p className="text-[10px] text-charcoal-400 text-center">
+                  Cash on Delivery & Free Delivery Over Rs. 3,000
+                </p>
+              </div>
             </div>
           </div>
         )}
