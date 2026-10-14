@@ -20,18 +20,45 @@ import { cacheProductsInIDB, getProductsFromIDB } from './dbCache';
 
 const PRODUCTS_COLLECTION = 'products';
 const LOCAL_STORAGE_KEY = 'hhd_products_cache';
+const DELETED_PRODUCTS_KEY = 'hhd_deleted_products_ids';
+
+function getDeletedProductIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DELETED_PRODUCTS_KEY);
+    if (raw) return new Set(JSON.parse(raw));
+  } catch (_) {}
+  return new Set();
+}
+
+function recordDeletedProductId(id: string): void {
+  try {
+    const set = getDeletedProductIds();
+    set.add(id);
+    localStorage.setItem(DELETED_PRODUCTS_KEY, JSON.stringify(Array.from(set)));
+  } catch (_) {}
+}
+
+function recordDeletedProductIds(ids: string[]): void {
+  try {
+    const set = getDeletedProductIds();
+    ids.forEach((id) => set.add(id));
+    localStorage.setItem(DELETED_PRODUCTS_KEY, JSON.stringify(Array.from(set)));
+  } catch (_) {}
+}
 
 // Local cache helper
 function getLocalProducts(): Product[] {
+  const deleted = getDeletedProductIds();
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (raw) {
-      return JSON.parse(raw);
+      const items: Product[] = JSON.parse(raw);
+      return items.filter((p) => !deleted.has(p.id));
     }
   } catch (e) {
     console.warn('Could not read from local storage cache', e);
   }
-  return INITIAL_PRODUCTS;
+  return INITIAL_PRODUCTS.filter((p) => !deleted.has(p.id));
 }
 
 function saveLocalProducts(products: Product[]): void {
@@ -123,6 +150,12 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
     }
   }
 
+  // Always exclude recorded deleted items
+  const deleted = getDeletedProductIds();
+  if (deleted.size > 0 && products.length > 0) {
+    products = products.filter((p) => !deleted.has(p.id));
+  }
+
   // In-memory filters for search and price range
   if (searchQuery && searchQuery.trim()) {
     const q = searchQuery.toLowerCase().trim();
@@ -174,13 +207,16 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
  * Fetch a single product by its slug
  */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const deleted = getDeletedProductIds();
   if (isFirebaseConfigured) {
     try {
       const colRef = collection(db, PRODUCTS_COLLECTION);
       const q = query(colRef, where('slug', '==', slug), limit(1));
       const snap = await getDocs(q);
       if (!snap.empty) {
-        return { id: snap.docs[0].id, ...snap.docs[0].data() } as Product;
+        const prod = { id: snap.docs[0].id, ...snap.docs[0].data() } as Product;
+        if (deleted.has(prod.id)) return null;
+        return prod;
       }
     } catch (e) {
       console.warn('Error fetching product by slug from Firestore:', e);
@@ -190,13 +226,18 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   // Local lookup
   const idbList = await getProductsFromIDB();
   const list = idbList.length > 0 ? idbList : getLocalProducts();
-  return list.find((p) => p.slug === slug) || null;
+  const found = list.find((p) => p.slug === slug);
+  if (found && !deleted.has(found.id)) return found;
+  return null;
 }
 
 /**
  * Fetch product by its ID
  */
 export async function getProductById(id: string): Promise<Product | null> {
+  if (getDeletedProductIds().has(id)) {
+    return null;
+  }
   if (isFirebaseConfigured) {
     try {
       const docRef = doc(db, PRODUCTS_COLLECTION, id);
@@ -286,6 +327,8 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
  * Delete a product
  */
 export async function deleteProduct(id: string): Promise<void> {
+  recordDeletedProductId(id);
+
   if (isFirebaseConfigured) {
     try {
       const docRef = doc(db, PRODUCTS_COLLECTION, id);
@@ -298,6 +341,32 @@ export async function deleteProduct(id: string): Promise<void> {
   const idbList = await getProductsFromIDB();
   const baseList = idbList.length > 0 ? idbList : getLocalProducts();
   const updatedList = baseList.filter((p) => p.id !== id);
+  saveLocalProducts(updatedList);
+}
+
+/**
+ * Bulk delete multiple products
+ */
+export async function deleteProducts(ids: string[]): Promise<void> {
+  if (!ids || ids.length === 0) return;
+  recordDeletedProductIds(ids);
+
+  if (isFirebaseConfigured) {
+    try {
+      const batch = writeBatch(db);
+      for (const id of ids) {
+        batch.delete(doc(db, PRODUCTS_COLLECTION, id));
+      }
+      await batch.commit();
+    } catch (e) {
+      console.warn('Batch delete failed in Firestore:', e);
+    }
+  }
+
+  const idbList = await getProductsFromIDB();
+  const baseList = idbList.length > 0 ? idbList : getLocalProducts();
+  const idSet = new Set(ids);
+  const updatedList = baseList.filter((p) => !idSet.has(p.id));
   saveLocalProducts(updatedList);
 }
 

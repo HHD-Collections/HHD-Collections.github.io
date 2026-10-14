@@ -17,6 +17,7 @@ import { Product, Category } from '../../types';
 import {
   getProducts,
   deleteProduct,
+  deleteProducts,
   duplicateProduct,
   updateProduct,
 } from '../../services/productService';
@@ -33,6 +34,9 @@ export const AdminProductsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
 
   const loadData = async () => {
@@ -89,11 +93,29 @@ export const AdminProductsPage: React.FC = () => {
     try {
       await deleteProduct(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));
+      setSelectedIds((prev) => prev.filter((item) => item !== id));
       setDeleteConfirmId(null);
-      setFeedbackMsg('Product deleted successfully');
+      setFeedbackMsg('Product removed successfully');
       setTimeout(() => setFeedbackMsg(null), 2500);
     } catch (e) {
       alert('Failed to delete product');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setIsDeletingBulk(true);
+    try {
+      await deleteProducts(selectedIds);
+      setProducts((prev) => prev.filter((p) => !selectedIds.includes(p.id)));
+      setFeedbackMsg(`Successfully removed ${selectedIds.length} products`);
+      setSelectedIds([]);
+      setShowBulkDeleteModal(false);
+      setTimeout(() => setFeedbackMsg(null), 3000);
+    } catch (e) {
+      alert('Failed to remove selected products');
+    } finally {
+      setIsDeletingBulk(false);
     }
   };
 
@@ -112,6 +134,26 @@ export const AdminProductsPage: React.FC = () => {
     }
     return true;
   });
+
+  const allFilteredSelected =
+    filteredProducts.length > 0 &&
+    filteredProducts.every((p) => selectedIds.includes(p.id));
+
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredProducts.map((p) => p.id));
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const productToDelete = products.find((p) => p.id === deleteConfirmId);
 
   return (
     <div className="space-y-6">
@@ -139,6 +181,45 @@ export const AdminProductsPage: React.FC = () => {
         <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center space-x-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{feedbackMsg}</span>
+        </div>
+      )}
+
+      {/* Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="p-3 sm:p-4 rounded-2xl bg-charcoal-900 dark:bg-charcoal-800 text-white border border-charcoal-700 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center space-x-3">
+            <span className="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-bold flex items-center justify-center">
+              {selectedIds.length}
+            </span>
+            <span className="text-xs font-semibold">
+              {selectedIds.length} {selectedIds.length === 1 ? 'product' : 'products'} selected
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="text-[11px] text-charcoal-300 hover:text-white underline cursor-pointer ml-1"
+            >
+              Clear selection
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+            <button
+              type="button"
+              onClick={toggleSelectAll}
+              className="px-3 py-1.5 rounded-xl border border-charcoal-700 bg-charcoal-800 hover:bg-charcoal-700 text-charcoal-200 text-xs font-semibold cursor-pointer"
+            >
+              {allFilteredSelected ? 'Deselect All' : `Select All (${filteredProducts.length})`}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowBulkDeleteModal(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-sm cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete Selected ({selectedIds.length})</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -202,6 +283,15 @@ export const AdminProductsPage: React.FC = () => {
               <table className="w-full text-left text-xs">
                 <thead className="bg-charcoal-50 dark:bg-charcoal-800/60 border-b border-charcoal-200 dark:border-charcoal-800 text-charcoal-400">
                   <tr>
+                    <th className="py-3 px-4 w-10">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all products"
+                        checked={allFilteredSelected}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 rounded border-charcoal-300 dark:border-charcoal-700 text-brand-500 focus:ring-brand-500 cursor-pointer accent-brand-500"
+                      />
+                    </th>
                     <th className="py-3 px-4 font-semibold">Image & Product</th>
                     <th className="py-3 px-4 font-semibold">Category</th>
                     <th className="py-3 px-4 font-semibold">Price (PKR)</th>
@@ -215,8 +305,19 @@ export const AdminProductsPage: React.FC = () => {
                   {filteredProducts.map((product) => (
                     <tr
                       key={product.id}
-                      className="hover:bg-charcoal-50/50 dark:hover:bg-charcoal-800/40 transition-colors"
+                      className={`hover:bg-charcoal-50/50 dark:hover:bg-charcoal-800/40 transition-colors ${
+                        selectedIds.includes(product.id) ? 'bg-brand-50/40 dark:bg-brand-950/20' : ''
+                      }`}
                     >
+                      <td className="py-3 px-4 w-10">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${product.name}`}
+                          checked={selectedIds.includes(product.id)}
+                          onChange={() => toggleSelectOne(product.id)}
+                          className="w-4 h-4 rounded border-charcoal-300 dark:border-charcoal-700 text-brand-500 focus:ring-brand-500 cursor-pointer accent-brand-500"
+                        />
+                      </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-3">
                           <img
@@ -340,8 +441,22 @@ export const AdminProductsPage: React.FC = () => {
             {/* Mobile Card View */}
             <div className="md:hidden divide-y divide-charcoal-100 dark:divide-charcoal-800">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="p-3.5 space-y-2.5">
+                <div
+                  key={product.id}
+                  className={`p-3.5 space-y-2.5 transition-colors ${
+                    selectedIds.includes(product.id) ? 'bg-brand-50/40 dark:bg-brand-950/20' : ''
+                  }`}
+                >
                   <div className="flex items-start space-x-3">
+                    <div className="pt-1">
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${product.name}`}
+                        checked={selectedIds.includes(product.id)}
+                        onChange={() => toggleSelectOne(product.id)}
+                        className="w-4 h-4 rounded border-charcoal-300 dark:border-charcoal-700 text-brand-500 focus:ring-brand-500 cursor-pointer accent-brand-500"
+                      />
+                    </div>
                     <img
                       src={product.primaryImage}
                       alt={product.name}
@@ -443,7 +558,7 @@ export const AdminProductsPage: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 p-6 space-y-4 shadow-2xl text-center">
             <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
@@ -452,20 +567,57 @@ export const AdminProductsPage: React.FC = () => {
               Delete Product?
             </h3>
             <p className="text-xs text-charcoal-500 leading-relaxed">
-              This will remove the product and its data from the database. This action cannot be undone.
+              Are you sure you want to permanently delete <strong>"{productToDelete?.name || 'this product'}"</strong>? This will remove it from the catalog and database. This action cannot be undone.
             </p>
             <div className="flex space-x-3 pt-2">
               <button
+                type="button"
                 onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 py-2.5 rounded-xl border border-charcoal-200 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200"
+                className="flex-1 py-2.5 rounded-xl border border-charcoal-200 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={() => handleDelete(deleteConfirmId)}
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 p-6 space-y-4 shadow-2xl text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+              Delete {selectedIds.length} Products?
+            </h3>
+            <p className="text-xs text-charcoal-500 leading-relaxed">
+              Are you sure you want to permanently delete these <strong>{selectedIds.length} selected products</strong>? They will be removed from the store inventory and catalog. This action cannot be undone.
+            </p>
+            <div className="flex space-x-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeletingBulk}
+                onClick={() => setShowBulkDeleteModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-charcoal-200 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeletingBulk}
+                onClick={handleBulkDelete}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold disabled:opacity-50"
+              >
+                {isDeletingBulk ? 'Deleting...' : `Yes, Delete (${selectedIds.length})`}
               </button>
             </div>
           </div>

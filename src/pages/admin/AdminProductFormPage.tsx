@@ -18,7 +18,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Product, ProductImage, Category } from '../../types';
-import { getProductById, createProduct, updateProduct } from '../../services/productService';
+import { getProductById, createProduct, updateProduct, deleteProduct } from '../../services/productService';
 import { getCategories } from '../../services/categoryService';
 import { uploadProductImage, deleteStorageImage, validateImageFile } from '../../services/storageService';
 import { optimizeImage } from '../../utils/imageOptimizer';
@@ -84,6 +84,8 @@ export const AdminProductFormPage: React.FC = () => {
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(isEditing);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -367,13 +369,33 @@ export const AdminProductFormPage: React.FC = () => {
     }
   };
 
+  const handleDeleteProduct = async () => {
+    if (!id) return;
+    setIsDeleting(true);
+    try {
+      for (const img of images) {
+        if (img.path) {
+          deleteStorageImage(img.path);
+        }
+      }
+      await deleteProduct(id);
+      navigate('/admin/products');
+    } catch (err: any) {
+      console.error('Delete product error:', err);
+      setUploadError(err.message || 'Failed to delete product');
+      setShowDeleteModal(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loadingInitial) {
     return <div className="p-12 text-center text-xs text-charcoal-400">Loading product editor...</div>;
   }
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-16">
-      {/* Top Breadcrumb */}
+      {/* Top Breadcrumb & Actions */}
       <div className="flex items-center justify-between">
         <Link
           to="/admin/products"
@@ -382,9 +404,21 @@ export const AdminProductFormPage: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Products</span>
         </Link>
-        <span className="text-xs text-charcoal-400 font-mono">
-          {isEditing ? `Product ID: ${id}` : 'Drafting New Product'}
-        </span>
+        <div className="flex items-center space-x-3">
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              className="px-3 py-1.5 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Remove Product</span>
+            </button>
+          )}
+          <span className="text-xs text-charcoal-400 font-mono">
+            {isEditing ? `Product ID: ${id}` : 'Drafting New Product'}
+          </span>
+        </div>
       </div>
 
       <div className="border-b border-charcoal-200 dark:border-charcoal-800 pb-4">
@@ -825,30 +859,80 @@ export const AdminProductFormPage: React.FC = () => {
         </div>
 
         {/* Submit Actions */}
-        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:space-x-4 pt-4">
-          <Link
-            to="/admin/products"
-            className="w-full sm:w-auto text-center px-6 py-3 rounded-xl border border-charcoal-300 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200 hover:bg-charcoal-100"
-          >
-            Cancel
-          </Link>
-
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="w-full sm:w-auto px-8 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold shadow-luxury disabled:opacity-70 transition-all flex items-center justify-center space-x-2"
-          >
-            {isSaving ? (
-              <span>Saving Product...</span>
-            ) : (
-              <>
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{isEditing ? 'Update Product' : 'Create Product'}</span>
-              </>
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:space-x-4 pt-4 border-t border-charcoal-100 dark:border-charcoal-800">
+          <div>
+            {isEditing && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full sm:w-auto px-5 py-3 rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white text-xs font-bold transition-all flex items-center justify-center space-x-2 shadow-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete This Product</span>
+              </button>
             )}
-          </button>
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 sm:space-x-4">
+            <Link
+              to="/admin/products"
+              className="w-full sm:w-auto text-center px-6 py-3 rounded-xl border border-charcoal-300 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200 hover:bg-charcoal-100"
+            >
+              Cancel
+            </Link>
+
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="w-full sm:w-auto px-8 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold shadow-luxury disabled:opacity-70 transition-all flex items-center justify-center space-x-2"
+            >
+              {isSaving ? (
+                <span>Saving Product...</span>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{isEditing ? 'Update Product' : 'Create Product'}</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-charcoal-900 border border-charcoal-200 dark:border-charcoal-800 p-6 space-y-4 shadow-2xl text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="font-serif text-lg font-bold text-charcoal-900 dark:text-white">
+              Delete Product?
+            </h3>
+            <p className="text-xs text-charcoal-500 leading-relaxed">
+              Are you sure you want to permanently delete <strong>"{watchName || 'this product'}"</strong>? This will remove it from the store catalog and database.
+            </p>
+            <div className="flex space-x-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-charcoal-200 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-charcoal-200 hover:bg-charcoal-100 dark:hover:bg-charcoal-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDeleteProduct}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
