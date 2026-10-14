@@ -21,6 +21,7 @@ import { Product, ProductImage, Category } from '../../types';
 import { getProductById, createProduct, updateProduct } from '../../services/productService';
 import { getCategories } from '../../services/categoryService';
 import { uploadProductImage, deleteStorageImage, validateImageFile } from '../../services/storageService';
+import { optimizeImage } from '../../utils/imageOptimizer';
 import { generateSlug } from '../../utils/formatters';
 
 const PRESET_SAMPLE_IMAGES = [
@@ -170,10 +171,7 @@ export const AdminProductFormPage: React.FC = () => {
 
     const categorySlug = watch('categorySlug') || 'general';
     const targetProductId = id || `temp-${Date.now()}`;
-
-    const newImagesList = [...images];
     const totalFiles = files.length;
-    let usedFallback = false;
 
     for (let i = 0; i < totalFiles; i++) {
       const file = files[i];
@@ -184,33 +182,51 @@ export const AdminProductFormPage: React.FC = () => {
       }
 
       try {
-        setUploadProgress(15);
+        setUploadProgress(Math.round(((i + 1) / totalFiles) * 80));
 
-        // Upload to Firebase Storage with fast auto-fallback to optimized WebP
-        const uploadResult = await uploadProductImage(
-          file,
-          categorySlug,
-          targetProductId,
-          (prog) => setUploadProgress(prog)
-        );
+        // 1. Instantly compress into crisp, lightweight WebP (<50ms)
+        const optimized = await optimizeImage(file, {
+          maxWidth: 1200,
+          maxHeight: 1200,
+          quality: 0.82,
+          convertToWebP: true,
+        });
 
-        if (uploadResult.isLocalFallback) {
-          usedFallback = true;
-        }
+        const imgId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
 
-        const isFirstImage = newImagesList.length === 0;
-        const newImgObj: ProductImage = {
-          id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-          url: uploadResult.url,
-          path: uploadResult.path,
-          altText: file.name.replace(/\.[^/.]+$/, ''),
-          isPrimary: isFirstImage,
-          order: newImagesList.length + 1,
-        };
+        // 2. Immediately attach to gallery so administrator sees it right away!
+        setImages((prev) => {
+          const isFirstImage = prev.length === 0;
+          return [
+            ...prev,
+            {
+              id: imgId,
+              url: optimized.dataUrl,
+              altText: file.name.replace(/\.[^/.]+$/, ''),
+              isPrimary: isFirstImage,
+              order: prev.length + 1,
+            },
+          ];
+        });
 
-        newImagesList.push(newImgObj);
+        // 3. In background, attempt cloud storage sync without blocking UI
+        uploadProductImage(file, categorySlug, targetProductId, undefined, false)
+          .then((res) => {
+            if (res && res.url && !res.isLocalFallback) {
+              setImages((prev) =>
+                prev.map((img) =>
+                  img.id === imgId ? { ...img, url: res.url, path: res.path } : img
+                )
+              );
+            } else if (res && res.isLocalFallback) {
+              setStorageFallbackNotice(true);
+            }
+          })
+          .catch(() => {
+            setStorageFallbackNotice(true);
+          });
       } catch (err: any) {
-        console.error('Image upload failed:', err);
+        console.error('Image processing failed:', err);
         setUploadError(`Failed to process ${file.name}: ${err.message}`);
       }
     }
@@ -219,11 +235,6 @@ export const AdminProductFormPage: React.FC = () => {
       fileInputRef.current.value = '';
     }
 
-    if (usedFallback) {
-      setStorageFallbackNotice(true);
-    }
-
-    setImages(newImagesList);
     setUploadProgress(null);
   };
 
