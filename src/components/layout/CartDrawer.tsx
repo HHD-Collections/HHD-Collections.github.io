@@ -2,12 +2,12 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Truck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useSettings } from '../../context/SettingsContext';
 import { formatPrice } from '../../utils/formatters';
-
-const FREE_SHIPPING_THRESHOLD = 3000;
 
 export const CartDrawer: React.FC = () => {
   const navigate = useNavigate();
+  const { settings } = useSettings();
   const {
     cart,
     isCartOpen,
@@ -18,10 +18,12 @@ export const CartDrawer: React.FC = () => {
     totalItems,
   } = useCart();
 
+  const freeShippingThreshold = settings.freeShippingThreshold ?? 3000;
+
   if (!isCartOpen) return null;
 
-  const freeShippingRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
+  const freeShippingRemaining = Math.max(0, freeShippingThreshold - subtotal);
+  const freeShippingProgress = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
   const handleCheckoutClick = () => {
     setIsCartOpen(false);

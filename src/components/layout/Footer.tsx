@@ -12,8 +12,10 @@ import {
   Heart,
 } from 'lucide-react';
 import { INITIAL_CATEGORIES } from '../../data/initialCategories';
+import { useSettings } from '../../context/SettingsContext';
 
 export const Footer: React.FC = () => {
+  const { settings } = useSettings();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -96,14 +98,22 @@ export const Footer: React.FC = () => {
               Curating luxury essentials, smart kitchen innovations, elegant home organizers, and premium personal care devices for modern lifestyles.
             </p>
             <div className="space-y-2 text-sm text-charcoal-300 pt-2">
-              <div className="flex items-center space-x-3">
+              <a
+                href={`https://wa.me/${(settings.whatsapp || '+92 306 0824762').replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 hover:text-brand-400 transition-colors"
+              >
                 <Phone className="w-4 h-4 text-brand-400" />
-                <span>+92 300 1234567 (WhatsApp available)</span>
-              </div>
-              <div className="flex items-center space-x-3">
+                <span>{settings.whatsapp || '+92 306 0824762'} (WhatsApp available)</span>
+              </a>
+              <a
+                href={`mailto:${settings.email || 'murtuza.tech.savvy@gmail.com'}`}
+                className="flex items-center space-x-3 hover:text-brand-400 transition-colors"
+              >
                 <Mail className="w-4 h-4 text-brand-400" />
-                <span>murtuza.tech.savvy@gmail.com</span>
-              </div>
+                <span>{settings.email || 'murtuza.tech.savvy@gmail.com'}</span>
+              </a>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-brand-400" />
                 <span>Karachi, Lahore & Nationwide Pakistan</span>

@@ -19,6 +19,7 @@ import { Product } from '../../types';
 import { getProductBySlug, getProducts } from '../../services/productService';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useSettings } from '../../context/SettingsContext';
 import { ImageGallery } from '../../components/product/ImageGallery';
 import { ProductCard } from '../../components/product/ProductCard';
 import { formatPrice, calculateDiscountPercentage } from '../../utils/formatters';
@@ -26,6 +27,7 @@ import { formatPrice, calculateDiscountPercentage } from '../../utils/formatters
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { settings } = useSettings();
 
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -117,8 +119,10 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   const handleWhatsAppOrder = () => {
-    const cleanNumber = '923001234567';
-    const message = `Hello HHD Collections! I want to order:\n\n*Product:* ${product.name}\n*SKU:* ${product.sku}\n*Quantity:* ${quantity}\n*Price:* ${formatPrice(unitPrice * quantity)}\n\nPlease assist with Cash on Delivery dispatch. Thank you!`;
+    const rawNumber = settings.whatsapp || '+92 306 0824762';
+    const cleanNumber = rawNumber.replace(/[^0-9]/g, '');
+    const storeTitle = settings.storeName || 'HHD Collections';
+    const message = `Hello ${storeTitle}! I want to order:\n\n*Product:* ${product.name}\n*SKU:* ${product.sku}\n*Quantity:* ${quantity}\n*Price:* ${formatPrice(unitPrice * quantity)}\n\nPlease assist with Cash on Delivery dispatch. Thank you!`;
     window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -308,7 +312,7 @@ export const ProductDetailPage: React.FC = () => {
               className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center justify-center space-x-2 transition-colors shadow-sm"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Order Instantly on WhatsApp (+92 300 1234567)</span>
+              <span>Order Instantly on WhatsApp ({settings.whatsapp || '+92 306 0824762'})</span>
             </button>
           </div>
 

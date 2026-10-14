@@ -15,6 +15,7 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useSettings } from '../../context/SettingsContext';
 import { INITIAL_CATEGORIES } from '../../data/initialCategories';
 
 export const Navbar: React.FC = () => {
@@ -23,6 +24,7 @@ export const Navbar: React.FC = () => {
   const { totalItems, setIsCartOpen } = useCart();
   const { totalWishlistItems } = useWishlist();
   const { theme, toggleTheme } = useTheme();
+  const { settings } = useSettings();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -64,26 +66,27 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 w-full transition-all duration-300">
       {/* Top Announcement Bar */}
-      <div className="bg-charcoal-900 text-ivory-100 dark:bg-black dark:text-brand-300 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-brand-500/20">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2 truncate mx-auto sm:mx-0">
-            <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-brand-400 animate-pulse flex-shrink-0"></span>
-            <span className="font-medium tracking-wide truncate">
-              <span className="sm:hidden">Free Nationwide Delivery on Orders Over Rs. 3,000 | COD</span>
-              <span className="hidden sm:inline">Free Delivery Across Pakistan on Orders Over Rs. 3,000 | Cash on Delivery Available</span>
-            </span>
-          </div>
-          <div className="hidden md:flex items-center space-x-6 text-xs text-charcoal-300">
-            <Link to="/contact" className="hover:text-brand-400 transition-colors">
-              Help & Support
-            </Link>
-            <Link to="/admin" className="hover:text-brand-400 flex items-center space-x-1 transition-colors">
-              <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
-              <span>Admin Portal</span>
-            </Link>
+      {settings.announcementActive !== false && (
+        <div className="bg-charcoal-900 text-ivory-100 dark:bg-black dark:text-brand-300 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-brand-500/20">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-2 truncate mx-auto sm:mx-0">
+              <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-brand-400 animate-pulse flex-shrink-0"></span>
+              <span className="font-medium tracking-wide truncate">
+                {settings.announcementBarText || 'Free Delivery Across Pakistan on Orders Over Rs. 3,000 | Cash on Delivery Available'}
+              </span>
+            </div>
+            <div className="hidden md:flex items-center space-x-6 text-xs text-charcoal-300">
+              <Link to="/contact" className="hover:text-brand-400 transition-colors">
+                Help & Support
+              </Link>
+              <Link to="/admin" className="hover:text-brand-400 flex items-center space-x-1 transition-colors">
+                <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
+                <span>Admin Portal</span>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Navigation Bar */}
       <nav

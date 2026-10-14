@@ -125,4 +125,5 @@ export interface StoreSettings {
     accountNumber: string;
     iban: string;
   };
+  updatedAt?: string | number;
 }

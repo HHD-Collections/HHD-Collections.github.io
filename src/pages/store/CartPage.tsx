@@ -11,14 +11,16 @@ import {
   Tag,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useSettings } from '../../context/SettingsContext';
 import { formatPrice } from '../../utils/formatters';
-
-const FREE_SHIPPING_THRESHOLD = 3000;
-const STANDARD_SHIPPING_FEE = 250;
 
 export const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { cart, updateQuantity, removeFromCart, clearCart, subtotal } = useCart();
+  const { settings } = useSettings();
+
+  const freeShippingThreshold = settings.freeShippingThreshold ?? 3000;
+  const standardShippingFee = settings.standardShippingFee ?? 250;
 
   const [promoCode, setPromoCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -38,8 +40,8 @@ export const CartPage: React.FC = () => {
   };
 
   const discountAmount = Math.round((subtotal * discountPercent) / 100);
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0;
-  const shippingFee = isFreeShipping ? 0 : STANDARD_SHIPPING_FEE;
+  const isFreeShipping = subtotal >= freeShippingThreshold || subtotal === 0;
+  const shippingFee = isFreeShipping ? 0 : standardShippingFee;
   const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);
 
   if (cart.length === 0) {
@@ -254,13 +256,13 @@ export const CartPage: React.FC = () => {
             {/* Free shipping banner */}
             <div className="p-3 rounded-xl bg-brand-50/60 dark:bg-brand-950/40 border border-brand-200/50 dark:border-brand-900/40 text-xs text-charcoal-700 dark:text-charcoal-300 flex items-center space-x-2">
               <Truck className="w-4 h-4 text-brand-500 flex-shrink-0" />
-              {subtotal >= FREE_SHIPPING_THRESHOLD ? (
+              {subtotal >= freeShippingThreshold ? (
                 <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
                   You qualify for Free Shipping!
                 </span>
               ) : (
                 <span>
-                  Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more to qualify for Free Delivery.
+                  Add {formatPrice(freeShippingThreshold - subtotal)} more to qualify for Free Delivery.
                 </span>
               )}
             </div>

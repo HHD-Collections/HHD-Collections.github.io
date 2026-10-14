@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, MessageCircle, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { useSettings } from '../../context/SettingsContext';
 
 export const ContactPage: React.FC = () => {
+  const { settings } = useSettings();
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -17,8 +19,11 @@ export const ContactPage: React.FC = () => {
   };
 
   const handleWhatsAppDirect = () => {
-    const text = encodeURIComponent('Hello HHD Collections! I have a question about my order.');
-    window.open(`https://wa.me/923001234567?text=${text}`, '_blank');
+    const rawNumber = settings.whatsapp || '+92 306 0824762';
+    const cleanNumber = rawNumber.replace(/[^0-9]/g, '');
+    const storeTitle = settings.storeName || 'HHD Collections';
+    const text = encodeURIComponent(`Hello ${storeTitle}! I have a question about my order.`);
+    window.open(`https://wa.me/${cleanNumber}?text=${text}`, '_blank');
   };
 
   return (
@@ -52,7 +57,7 @@ export const ContactPage: React.FC = () => {
                   <strong className="block text-sm text-charcoal-900 dark:text-white">
                     Phone & WhatsApp
                   </strong>
-                  <span>+92 300 1234567</span>
+                  <span>{settings.whatsapp || '+92 306 0824762'}</span>
                 </div>
               </div>
 
@@ -64,7 +69,7 @@ export const ContactPage: React.FC = () => {
                   <strong className="block text-sm text-charcoal-900 dark:text-white">
                     Email Support
                   </strong>
-                  <span className="break-all">murtuza.tech.savvy@gmail.com</span>
+                  <span className="break-all">{settings.email || 'murtuza.tech.savvy@gmail.com'}</span>
                 </div>
               </div>
 

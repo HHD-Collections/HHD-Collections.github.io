@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { SettingsProvider } from './context/SettingsContext';
 
 // Storefront Components
 import { Navbar } from './components/layout/Navbar';
@@ -58,41 +59,43 @@ export const App: React.FC = () => {
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
-            <HashRouter>
-              <Routes>
-                {/* Customer Storefront Routes */}
-                <Route element={<StorefrontLayout />}>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/shop" element={<ShopPage />} />
-                  <Route path="/categories" element={<CategoriesPage />} />
-                  <Route path="/category/:slug" element={<CategoryDetailPage />} />
-                  <Route path="/product/:slug" element={<ProductDetailPage />} />
-                  <Route path="/search" element={<SearchResultsPage />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Route>
+            <SettingsProvider>
+              <HashRouter>
+                <Routes>
+                  {/* Customer Storefront Routes */}
+                  <Route element={<StorefrontLayout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/shop" element={<ShopPage />} />
+                    <Route path="/categories" element={<CategoriesPage />} />
+                    <Route path="/category/:slug" element={<CategoryDetailPage />} />
+                    <Route path="/product/:slug" element={<ProductDetailPage />} />
+                    <Route path="/search" element={<SearchResultsPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Route>
 
-                {/* Admin Portal Authentication */}
-                <Route path="/admin/login" element={<AdminLoginPage />} />
+                  {/* Admin Portal Authentication */}
+                  <Route path="/admin/login" element={<AdminLoginPage />} />
 
-                {/* Secure Admin Dashboard Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminOverviewPage />} />
-                  <Route path="products" element={<AdminProductsPage />} />
-                  <Route path="products/new" element={<AdminProductFormPage />} />
-                  <Route path="products/edit/:id" element={<AdminProductFormPage />} />
-                  <Route path="categories" element={<AdminCategoriesPage />} />
-                  <Route path="orders" element={<AdminOrdersPage />} />
-                  <Route path="settings" element={<AdminSettingsPage />} />
-                </Route>
-              </Routes>
-            </HashRouter>
+                  {/* Secure Admin Dashboard Routes */}
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminOverviewPage />} />
+                    <Route path="products" element={<AdminProductsPage />} />
+                    <Route path="products/new" element={<AdminProductFormPage />} />
+                    <Route path="products/edit/:id" element={<AdminProductFormPage />} />
+                    <Route path="categories" element={<AdminCategoriesPage />} />
+                    <Route path="orders" element={<AdminOrdersPage />} />
+                    <Route path="settings" element={<AdminSettingsPage />} />
+                  </Route>
+                </Routes>
+              </HashRouter>
+            </SettingsProvider>
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>

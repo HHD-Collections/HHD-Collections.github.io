@@ -15,6 +15,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useSettings } from '../../context/SettingsContext';
 import { createOrder, buildWhatsAppOrderUrl } from '../../services/orderService';
 import { formatPrice } from '../../utils/formatters';
 import { Order, PaymentMethod } from '../../types';
@@ -36,17 +37,17 @@ const checkoutSchema = z.object({
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
-const FREE_SHIPPING_THRESHOLD = 3000;
-const STANDARD_SHIPPING_FEE = 250;
-
 export const CheckoutPage: React.FC = () => {
   const { cart, subtotal, clearCart } = useCart();
+  const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const shippingFee = isFreeShipping ? 0 : STANDARD_SHIPPING_FEE;
+  const freeShippingThreshold = settings.freeShippingThreshold ?? 3000;
+  const standardShippingFee = settings.standardShippingFee ?? 250;
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+  const shippingFee = isFreeShipping ? 0 : standardShippingFee;
   const total = subtotal + shippingFee;
 
   const {
@@ -109,7 +110,7 @@ export const CheckoutPage: React.FC = () => {
 
   // If order is completed, show Order Confirmation screen
   if (completedOrder) {
-    const whatsAppUrl = buildWhatsAppOrderUrl(completedOrder);
+    const whatsAppUrl = buildWhatsAppOrderUrl(completedOrder, settings.whatsapp);
 
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
