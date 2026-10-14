@@ -15,12 +15,41 @@ import {
   CheckCircle2,
   AlertCircle,
   Image as ImageIcon,
+  Sparkles,
 } from 'lucide-react';
 import { Product, ProductImage, Category } from '../../types';
 import { getProductById, createProduct, updateProduct } from '../../services/productService';
 import { getCategories } from '../../services/categoryService';
 import { uploadProductImage, deleteStorageImage, validateImageFile } from '../../services/storageService';
 import { generateSlug } from '../../utils/formatters';
+
+const PRESET_SAMPLE_IMAGES = [
+  {
+    name: '💎 Diamond Ring',
+    url: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80',
+    alt: 'Diamond Solitaire Ring',
+  },
+  {
+    name: '✨ Gold Necklace',
+    url: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80',
+    alt: 'Luxury Gold Pendant Necklace',
+  },
+  {
+    name: '⌚ Classic Watch',
+    url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80',
+    alt: 'Classic Chronograph Watch',
+  },
+  {
+    name: '👜 Leather Handbag',
+    url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80',
+    alt: 'Luxury Leather Handbag',
+  },
+  {
+    name: '🥣 Kitchen Chopper',
+    url: 'https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&w=800&q=80',
+    alt: 'Electric Kitchen Chopper Food Processor',
+  },
+];
 
 const productSchema = z.object({
   name: z.string().min(2, 'Product name is required'),
@@ -50,6 +79,7 @@ export const AdminProductFormPage: React.FC = () => {
   const [images, setImages] = useState<ProductImage[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [storageFallbackNotice, setStorageFallbackNotice] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(isEditing);
@@ -143,6 +173,7 @@ export const AdminProductFormPage: React.FC = () => {
 
     const newImagesList = [...images];
     const totalFiles = files.length;
+    let usedFallback = false;
 
     for (let i = 0; i < totalFiles; i++) {
       const file = files[i];
@@ -153,15 +184,19 @@ export const AdminProductFormPage: React.FC = () => {
       }
 
       try {
-        setUploadProgress(Math.round(((i + 1) / totalFiles) * 100));
+        setUploadProgress(15);
 
-        // Upload to Firebase Storage
+        // Upload to Firebase Storage with fast auto-fallback to optimized WebP
         const uploadResult = await uploadProductImage(
           file,
           categorySlug,
           targetProductId,
           (prog) => setUploadProgress(prog)
         );
+
+        if (uploadResult.isLocalFallback) {
+          usedFallback = true;
+        }
 
         const isFirstImage = newImagesList.length === 0;
         const newImgObj: ProductImage = {
@@ -176,12 +211,33 @@ export const AdminProductFormPage: React.FC = () => {
         newImagesList.push(newImgObj);
       } catch (err: any) {
         console.error('Image upload failed:', err);
-        setUploadError(`Failed to upload ${file.name}: ${err.message}`);
+        setUploadError(`Failed to process ${file.name}: ${err.message}`);
       }
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    if (usedFallback) {
+      setStorageFallbackNotice(true);
     }
 
     setImages(newImagesList);
     setUploadProgress(null);
+  };
+
+  const handleAddPresetImage = (preset: (typeof PRESET_SAMPLE_IMAGES)[0]) => {
+    const isFirstImage = images.length === 0;
+    const newImg: ProductImage = {
+      id: `img-preset-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      url: preset.url,
+      altText: preset.alt,
+      isPrimary: isFirstImage,
+      order: images.length + 1,
+    };
+    setImages((prev) => [...prev, newImg]);
+    setUploadError(null);
   };
 
   const handleAddImageUrl = () => {
@@ -385,7 +441,7 @@ export const AdminProductFormPage: React.FC = () => {
             {uploadProgress !== null && (
               <div className="mt-4 max-w-xs mx-auto space-y-1">
                 <div className="flex justify-between text-[11px] text-charcoal-400">
-                  <span>Uploading to Firebase Storage...</span>
+                  <span>Processing & uploading image...</span>
                   <span>{uploadProgress}%</span>
                 </div>
                 <div className="w-full bg-charcoal-200 dark:bg-charcoal-700 h-2 rounded-full overflow-hidden">
@@ -396,6 +452,50 @@ export const AdminProductFormPage: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Storage Fallback Notice if Cloud Bucket is unprovisioned */}
+          {storageFallbackNotice && (
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-start space-x-2.5">
+              <Sparkles className="w-4 h-4 text-brand-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold text-white">Images Ready (Optimized WebP)</p>
+                <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                  Notice: Firebase Storage bucket is not yet provisioned in Firebase Console, so images were automatically compressed and stored directly with your product record.
+                </p>
+                <p className="text-[10px] text-charcoal-400">
+                  To activate the cloud storage bucket in your project, visit{' '}
+                  <a
+                    href="https://console.firebase.google.com/project/hhd-collections/storage"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-brand-400 underline font-medium hover:text-brand-300"
+                  >
+                    Firebase Console &gt; Storage &gt; Get Started
+                  </a>.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Preset Sample Images */}
+          <div className="space-y-2 pt-1">
+            <span className="text-[11px] font-semibold text-charcoal-400 uppercase tracking-wider block">
+              Or pick instant sample product images (1-click test):
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_SAMPLE_IMAGES.map((preset) => (
+                <button
+                  key={preset.name}
+                  type="button"
+                  onClick={() => handleAddPresetImage(preset)}
+                  className="px-3 py-1.5 rounded-lg bg-charcoal-100 dark:bg-charcoal-800 hover:bg-brand-500/20 hover:text-brand-500 border border-charcoal-200 dark:border-charcoal-700 text-charcoal-700 dark:text-charcoal-300 text-xs font-medium transition-colors flex items-center space-x-1.5"
+                >
+                  <Plus className="w-3 h-3 text-brand-500" />
+                  <span>{preset.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Add Image by URL fallback */}

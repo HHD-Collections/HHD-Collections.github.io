@@ -16,6 +16,7 @@ import { db, isFirebaseConfigured } from './firebase';
 import { Product } from '../types';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 import { generateSlug } from '../utils/formatters';
+import { cacheProductsInIDB, getProductsFromIDB } from './dbCache';
 
 const PRODUCTS_COLLECTION = 'products';
 const LOCAL_STORAGE_KEY = 'hhd_products_cache';
@@ -37,8 +38,9 @@ function saveLocalProducts(products: Product[]): void {
   try {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(products));
   } catch (e) {
-    console.warn('Could not write to local storage cache', e);
+    console.warn('Could not write to local storage cache (quota might be full)', e);
   }
+  cacheProductsInIDB(products).catch(() => {});
 }
 
 export interface GetProductsOptions {
@@ -103,7 +105,12 @@ export async function getProducts(options: GetProductsOptions = {}): Promise<Pro
 
   // If Firestore returned no documents or failed, use local dataset
   if (products.length === 0) {
-    products = getLocalProducts();
+    const idbProducts = await getProductsFromIDB();
+    if (idbProducts && idbProducts.length > 0) {
+      products = idbProducts;
+    } else {
+      products = getLocalProducts();
+    }
 
     if (activeOnly) {
       products = products.filter((p) => p.active);
@@ -181,8 +188,9 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 
   // Local lookup
-  const localList = getLocalProducts();
-  return localList.find((p) => p.slug === slug) || null;
+  const idbList = await getProductsFromIDB();
+  const list = idbList.length > 0 ? idbList : getLocalProducts();
+  return list.find((p) => p.slug === slug) || null;
 }
 
 /**
@@ -201,8 +209,9 @@ export async function getProductById(id: string): Promise<Product | null> {
     }
   }
 
-  const localList = getLocalProducts();
-  return localList.find((p) => p.id === id) || null;
+  const idbList = await getProductsFromIDB();
+  const list = idbList.length > 0 ? idbList : getLocalProducts();
+  return list.find((p) => p.id === id) || null;
 }
 
 /**
@@ -230,9 +239,10 @@ export async function createProduct(productData: Omit<Product, 'id' | 'createdAt
     }
   }
 
-  // Update local cache
-  const localList = getLocalProducts();
-  const updatedList = [newProduct, ...localList];
+  // Update local and IDB caches
+  const idbList = await getProductsFromIDB();
+  const baseList = idbList.length > 0 ? idbList : getLocalProducts();
+  const updatedList = [newProduct, ...baseList.filter((p) => p.id !== newId)];
   saveLocalProducts(updatedList);
 
   return newProduct;
@@ -263,9 +273,10 @@ export async function updateProduct(id: string, updates: Partial<Product>): Prom
     }
   }
 
-  // Update local cache
-  const localList = getLocalProducts();
-  const updatedList = localList.map((p) => (p.id === id ? updatedProduct : p));
+  // Update local and IDB caches
+  const idbList = await getProductsFromIDB();
+  const baseList = idbList.length > 0 ? idbList : getLocalProducts();
+  const updatedList = baseList.map((p) => (p.id === id ? updatedProduct : p));
   saveLocalProducts(updatedList);
 
   return updatedProduct;
@@ -284,8 +295,10 @@ export async function deleteProduct(id: string): Promise<void> {
     }
   }
 
-  const localList = getLocalProducts();
-  saveLocalProducts(localList.filter((p) => p.id !== id));
+  const idbList = await getProductsFromIDB();
+  const baseList = idbList.length > 0 ? idbList : getLocalProducts();
+  const updatedList = baseList.filter((p) => p.id !== id);
+  saveLocalProducts(updatedList);
 }
 
 /**

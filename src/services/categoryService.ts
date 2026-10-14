@@ -12,6 +12,7 @@ import { db, isFirebaseConfigured } from './firebase';
 import { Category } from '../types';
 import { INITIAL_CATEGORIES } from '../data/initialCategories';
 import { generateSlug } from '../utils/formatters';
+import { cacheCategoriesInIDB, getCategoriesFromIDB } from './dbCache';
 
 const CATEGORIES_COLLECTION = 'categories';
 const LOCAL_STORAGE_KEY = 'hhd_categories_cache';
@@ -32,6 +33,7 @@ function saveLocalCategories(cats: Category[]): void {
   } catch (e) {
     console.warn('Could not save categories to cache', e);
   }
+  cacheCategoriesInIDB(cats).catch(() => {});
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -52,7 +54,12 @@ export async function getCategories(): Promise<Category[]> {
   }
 
   if (categories.length === 0) {
-    categories = getLocalCategories();
+    const idbCats = await getCategoriesFromIDB();
+    if (idbCats && idbCats.length > 0) {
+      categories = idbCats;
+    } else {
+      categories = getLocalCategories();
+    }
   }
 
   // Sort by order ascending
